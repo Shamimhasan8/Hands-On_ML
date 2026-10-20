@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hands-On Machine Learning — Chapter 1 Field Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --paper: #EEF1EF;
+  --paper-raised: #F8F9F7;
+  --ink: #1B2430;
+  --ink-soft: #4A5568;
+  --rule: #C9D1CC;
+  --margin-rule: #C1443C;
+  --teal: #0E6E62;
+  --teal-deep: #0A4F46;
+
+  --law-predict: #2F6FED;
+  --law-predict-bg: #E9F0FE;
+  --law-fail: #C1443C;
+  --law-fail-bg: #FBEAE8;
+  --law-compress: #2F9E67;
+  --law-compress-bg: #E7F5EC;
+  --law-stakes: #C67D02;
+  --law-stakes-bg: #FBF0DC;
+  --law-judgment: #7B4FE0;
+  --law-judgment-bg: #F0EAFB;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --shadow-card: 0 1px 3px rgba(27,36,48,0.08), 0 1px 2px rgba(27,36,48,0.06);
+  --shadow-raised: 0 4px 14px rgba(27,36,48,0.10);
+  --radius: 10px;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.6;
+  font-size:16px;
+}
+img,svg{max-width:100%;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0 0 .5em;color:var(--ink);}
+h1{font-weight:700;}
+p{margin:0 0 1em;}
+a{color:var(--teal-deep);}
+.mono{font-family:var(--font-mono);}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
+button{font-family:var(--font-body);cursor:pointer;}
+:focus-visible{outline:3px solid var(--law-predict);outline-offset:2px;}
+
+/* ============ LAYOUT SHELL ============ */
+.shell{
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  max-width:1400px;
+  margin:0 auto;
+}
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr;}
+}
+
+/* ---- Sticky Nav rail: notebook tab dividers ---- */
+.railwrap{
+  position:sticky; top:0; align-self:start; height:100vh;
+  overflow-y:auto; padding:18px 0 40px;
+  border-right:1px solid var(--rule);
+  background:var(--paper-raised);
+}
+@media (max-width:960px){
+  .railwrap{position:static;height:auto;border-right:none;border-bottom:1px solid var(--rule);}
+}
+.rail-brand{
+  padding:0 18px 14px; margin-bottom:8px; border-bottom:1px dashed var(--rule);
+}
+.rail-brand .tag{
+  display:inline-block; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em;
+  background:var(--teal); color:#fff; padding:2px 8px; border-radius:4px; margin-bottom:6px;
+}
+.rail-brand strong{display:block;font-family:var(--font-display);font-size:1.05rem;}
+.progresswrap{padding:10px 18px 16px;}
+.progress-label{font-size:.72rem;font-family:var(--font-mono);color:var(--ink-soft);display:flex;justify-content:space-between;margin-bottom:4px;}
+.progress-track{height:8px;background:var(--rule);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--law-predict),var(--teal));transition:width .25s ease;}
+
+nav.toc{padding:4px 8px;}
+nav.toc a{
+  display:block; padding:7px 10px; margin:1px 0; font-size:.88rem; text-decoration:none;
+  color:var(--ink-soft); border-radius:6px; border-left:3px solid transparent;
+}
+nav.toc a:hover{background:var(--paper);color:var(--ink);}
+nav.toc a.active{background:var(--law-predict-bg);color:var(--teal-deep);border-left-color:var(--teal);font-weight:600;}
+nav.toc .toc-group-label{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);padding:10px 10px 2px;}
+
+/* mode switch */
+.modewrap{padding:14px 18px;border-top:1px dashed var(--rule);margin-top:8px;}
+.modewrap .modewrap-label{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;}
+.mode-btns{display:flex;flex-direction:column;gap:6px;}
+.mode-btn{
+  border:1px solid var(--rule); background:#fff; padding:8px 10px; border-radius:8px; text-align:left;
+  font-size:.82rem; color:var(--ink-soft); font-weight:600;
+}
+.mode-btn.active{border-color:var(--teal);color:var(--teal-deep);background:var(--law-predict-bg);}
+
+/* ============ MAIN COLUMN ============ */
+main{padding:0 0 80px;min-width:0;}
+
+/* ---- Hero ---- */
+.hero{
+  position:relative; padding:64px 48px 56px; background:var(--paper-raised);
+  border-bottom:1px solid var(--rule); overflow:hidden;
+}
+@media (max-width:700px){.hero{padding:44px 22px 40px;}}
+.hero::before{ /* punch holes, notebook feel */
+  content:""; position:absolute; left:14px; top:0; bottom:0; width:1px;
+  background:repeating-linear-gradient(var(--rule),var(--rule) 1px,transparent 1px,transparent 1px);
+}
+.hero .eyebrow{
+  font-family:var(--font-mono); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--teal-deep); background:var(--law-compress-bg); display:inline-block; padding:4px 10px;
+  border-radius:20px; margin-bottom:18px; border:1px solid #cfe6da;
+}
+.hero h1{font-size:clamp(2rem,4.4vw,3.4rem); max-width:15ch;}
+.hero .sub{font-size:1.15rem;color:var(--ink-soft);max-width:60ch;margin-top:10px;}
+.hero .lawstrip{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px;}
+.lawchip{
+  display:flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:.76rem; font-weight:600;
+  padding:6px 12px; border-radius:20px; border:1px solid transparent;
+}
+.lawchip.predict{background:var(--law-predict-bg);color:var(--law-predict);border-color:#c6d9fb;}
+.lawchip.fail{background:var(--law-fail-bg);color:var(--law-fail);border-color:#f0cac6;}
+.lawchip.compress{background:var(--law-compress-bg);color:var(--law-compress);border-color:#c6e6d3;}
+.lawchip.stakes{background:var(--law-stakes-bg);color:var(--law-stakes);border-color:#f0dcad;}
+.lawchip.judgment{background:var(--law-judgment-bg);color:var(--law-judgment);border-color:#dccdf5;}
+
+.hero-flow{
+  margin-top:34px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+  font-family:var(--font-mono); font-size:.82rem; color:var(--ink-soft);
+}
+.hero-flow .step{background:#fff;border:1px solid var(--rule);padding:5px 10px;border-radius:6px;}
+.hero-flow .arrow{color:var(--teal);}
+
+/* ---- Section shell: "notebook page" ---- */
+section.page{
+  padding:52px 48px; border-bottom:1px solid var(--rule); position:relative; scroll-margin-top:20px;
+}
+@media (max-width:700px){section.page{padding:36px 20px;}}
+section.page::before{
+  content:""; position:absolute; left:14px; top:0; bottom:0; width:1px;
+  background:repeating-linear-gradient(var(--rule),var(--rule) 1px,transparent 1px,transparent 1px);
+  opacity:.5; display:none;
+}
+.page-kicker{
+  font-family:var(--font-mono); font-size:.74rem; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-soft); margin-bottom:6px;
+}
+section.page > h2{font-size:clamp(1.5rem,2.6vw,2.1rem); max-width:26ch;}
+.page-intro{color:var(--ink-soft); max-width:70ch; font-size:1.02rem;}
+
+/* generic card */
+.card{
+  background:var(--paper-raised); border:1px solid var(--rule); border-radius:var(--radius);
+  padding:22px 24px; box-shadow:var(--shadow-card);
+}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media (max-width:800px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+/* ============ FIVE LAWS TAB STACK (signature element) ============ */
+.concept{
+  position:relative; margin:34px 0; border:1px solid var(--rule); border-radius:var(--radius);
+  background:#fff; box-shadow:var(--shadow-raised);
+}
+.concept-head{
+  padding:18px 24px; border-bottom:1px solid var(--rule); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;
+}
+.concept-head h3{margin:0;font-size:1.3rem;}
+.concept-num{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);}
+.tabstack{
+  display:flex; flex-wrap:wrap; gap:6px; padding:0 24px 16px;
+}
+.tabbtn{
+  border:none; border-radius:7px 7px 0 0; padding:8px 12px; font-size:.78rem; font-weight:700;
+  font-family:var(--font-mono); color:#fff; opacity:.55; transition:opacity .15s, transform .15s;
+}
+.tabbtn:hover{opacity:.85;}
+.tabbtn.active{opacity:1; transform:translateY(-2px);}
+.tabbtn.predict{background:var(--law-predict);}
+.tabbtn.fail{background:var(--law-fail);}
+.tabbtn.compress{background:var(--law-compress);}
+.tabbtn.stakes{background:var(--law-stakes);}
+.tabbtn.judgment{background:var(--law-judgment);}
+.tabbtn.story{background:var(--teal);}
+.tabbtn.viz{background:#3B4252;}
+.tabbtn.terms{background:#8A6D3B;}
+.tabbtn.quick{background:#455A64;}
+
+.panel{display:none;padding:22px 24px 26px;}
+.panel.active{display:block;}
+.panel h4{font-size:.98rem;text-transform:uppercase;letter-spacing:.03em;font-family:var(--font-mono);color:var(--ink-soft);margin-bottom:10px;}
+
+/* story panel */
+.story-box{background:var(--law-compress-bg);border-left:4px solid var(--teal);padding:16px 18px;border-radius:0 8px 8px 0;margin-bottom:14px;}
+.story-mapping{
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--font-mono);font-size:.82rem;
+  background:#fff;border:1px dashed var(--rule);padding:12px 14px;border-radius:8px;margin-top:10px;
+}
+.story-mapping .node{background:var(--paper);padding:4px 10px;border-radius:6px;border:1px solid var(--rule);}
+.story-mapping .arrow{color:var(--teal);font-weight:700;}
+
+/* predict panel */
+.predict-box textarea{
+  width:100%; min-height:80px; border:1px solid var(--rule); border-radius:8px; padding:10px 12px;
+  font-family:var(--font-body); font-size:.94rem; resize:vertical; background:#fff;
+}
+.reveal-btn{
+  margin-top:10px; background:var(--law-predict); color:#fff; border:none; padding:9px 16px;
+  border-radius:8px; font-weight:600; font-size:.85rem;
+}
+.reveal-btn:hover{background:#1f56c9;}
+.reveal-box{display:none;margin-top:14px;padding:14px 16px;background:var(--law-predict-bg);border-radius:8px;border:1px solid #c6d9fb;}
+.reveal-box.open{display:block;}
+.surprise-box{margin-top:12px;padding:12px 14px;background:#fff;border:1px dashed var(--law-predict);border-radius:8px;font-size:.92rem;}
+
+/* three-ways explanation */
+.threeways{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px;}
+@media (max-width:800px){.threeways{grid-template-columns:1fr;}}
+.waycard{border:1px solid var(--rule);border-radius:8px;padding:14px 16px;background:var(--paper-raised);}
+.waycard .waylabel{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.04em;}
+
+/* fail panel */
+.fail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:800px){.fail-grid{grid-template-columns:1fr;}}
+.fail-item{border:1px solid #f0cac6;background:var(--law-fail-bg);border-radius:8px;padding:14px 16px;}
+.fail-item h5{margin:0 0 6px;color:var(--law-fail);font-size:.9rem;font-family:var(--font-mono);text-transform:uppercase;}
+
+/* compress panel */
+.compress-flow{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.compress-flow .cf-item{flex:1;min-width:200px;border:1px solid #c6e6d3;background:var(--law-compress-bg);border-radius:8px;padding:12px 14px;}
+.compress-flow .cf-item h5{margin:0 0 6px;font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;color:var(--law-compress);}
+.onesentence{margin-top:10px;font-size:1.05rem;font-family:var(--font-display);font-style:italic;color:var(--teal-deep);}
+
+/* stakes panel */
+.stakes-box{border:1px solid #f0dcad;background:var(--law-stakes-bg);border-radius:8px;padding:16px 18px;}
+.challenge-box{margin-top:12px;border:1px dashed var(--law-stakes);border-radius:8px;padding:14px 16px;background:#fff;}
+
+/* judgment panel */
+.judg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:800px){.judg-grid{grid-template-columns:1fr;}}
+.judg-item{border:1px solid #dccdf5;background:var(--law-judgment-bg);border-radius:8px;padding:14px 16px;}
+.judg-item h5{margin:0 0 8px;font-family:var(--font-mono);font-size:.78rem;text-transform:uppercase;color:var(--law-judgment);}
+.judg-item ul{margin:0;padding-left:18px;}
+.ask-ai{margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--rule);border-radius:8px;font-family:var(--font-mono);font-size:.85rem;}
+
+/* interview mini panel */
+.interview-mini{border:1px solid var(--rule);border-radius:8px;padding:14px 16px;background:var(--paper-raised);}
+.interview-mini .role{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);text-transform:uppercase;}
+
+/* quick check */
+.quickcheck{display:flex;flex-direction:column;gap:10px;}
+.qc-item{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;background:var(--paper-raised);}
+.qc-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qc-opt{border:1px solid var(--rule);background:#fff;padding:6px 12px;border-radius:6px;font-size:.85rem;}
+.qc-opt.correct{background:var(--law-compress-bg);border-color:var(--law-compress);}
+.qc-opt.incorrect{background:var(--law-fail-bg);border-color:var(--law-fail);}
+.qc-feedback{margin-top:8px;font-size:.88rem;display:none;}
+.qc-feedback.show{display:block;}
+
+.keytakeaways{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.keytakeaways li{padding-left:24px;position:relative;}
+.keytakeaways li::before{content:"✓";position:absolute;left:0;color:var(--teal);font-weight:700;}
+
+/* terminology chips */
+.termchips{display:flex;flex-wrap:wrap;gap:8px;}
+.termchip{background:#fff;border:1px solid var(--rule);padding:5px 12px;border-radius:16px;font-family:var(--font-mono);font-size:.78rem;}
+
+/* Beginner/technical mode toggling on inline blocks */
+[data-mode-block]{transition:opacity .15s;}
+body.mode-beginner [data-mode-block="technical"]{display:none;}
+body.mode-technical [data-mode-block="beginner"]{display:none;}
+body.mode-interview [data-mode-block="beginner"],
+body.mode-interview [data-mode-block="technical"]{display:none;}
+body.mode-interview [data-mode-block="interview-only"]{display:block;}
+[data-mode-block="interview-only"]{display:none;border-left:4px solid var(--law-judgment);background:var(--law-judgment-bg);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:10px;}
+
+/* Diagrams */
+.diagram-card{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-card);}
+.diagram-card figcaption{margin-top:12px;font-size:.92rem;color:var(--ink-soft);}
+.notice-box{margin-top:10px;font-size:.88rem;background:var(--paper);border-radius:6px;padding:8px 12px;border-left:3px solid var(--teal);}
+
+/* Glossary */
+.glossary-search{width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:8px;font-size:1rem;margin-bottom:18px;background:#fff;}
+.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+@media (max-width:800px){.glossary-grid{grid-template-columns:1fr;}}
+.gterm{border:1px solid var(--rule);border-radius:8px;background:#fff;overflow:hidden;}
+.gterm summary{padding:14px 16px;font-weight:700;cursor:pointer;font-family:var(--font-display);font-size:1.05rem;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+.gterm summary::-webkit-details-marker{display:none;}
+.gterm summary::after{content:"+";font-family:var(--font-mono);color:var(--teal);font-size:1.2rem;}
+.gterm[open] summary::after{content:"–";}
+.gterm .gbody{padding:0 16px 16px;font-size:.9rem;}
+.gterm .gbody dt{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);margin-top:10px;}
+.gterm .gbody dd{margin:2px 0 0;}
+
+/* Exercises */
+.exercise{border:1px solid var(--rule);border-radius:8px;background:#fff;padding:16px 18px;margin-bottom:14px;}
+.exercise-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.badge{font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;padding:3px 9px;border-radius:12px;letter-spacing:.03em;}
+.badge.beginner{background:var(--law-compress-bg);color:var(--law-compress);}
+.badge.intermediate{background:var(--law-stakes-bg);color:var(--law-stakes);}
+.badge.advanced{background:var(--law-fail-bg);color:var(--law-fail);}
+.badge.skill{background:#EDEBF9;color:var(--law-judgment);}
+.exercise-answer{display:none;margin-top:10px;padding:12px 14px;background:var(--paper);border-radius:8px;font-size:.9rem;}
+.exercise-answer.show{display:block;}
+.showbtn{background:var(--ink);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:.8rem;font-weight:600;}
+
+/* Interview section */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.filter-btn{border:1px solid var(--rule);background:#fff;padding:7px 14px;border-radius:20px;font-size:.82rem;font-weight:600;color:var(--ink-soft);}
+.filter-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.iq-card{border:1px solid var(--rule);border-radius:10px;background:#fff;padding:18px 20px;margin-bottom:16px;}
+.iq-q{font-family:var(--font-display);font-size:1.1rem;margin-bottom:8px;}
+.iq-toggle{background:none;border:1px solid var(--rule);padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:600;color:var(--teal-deep);}
+.iq-body{display:none;margin-top:12px;}
+.iq-body.show{display:block;}
+.iq-row{margin-bottom:8px;font-size:.9rem;}
+.iq-row strong{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:2px;}
+
+/* flashcards */
+.flashwrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.flashcard{
+  width:100%; max-width:560px; min-height:200px; perspective:1200px; cursor:pointer;
+}
+.flashcard-inner{position:relative;width:100%;height:100%;min-height:200px;transition:transform .5s;transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashface{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:26px;box-shadow:var(--shadow-raised);}
+.flashface.front{background:#fff;font-family:var(--font-display);font-size:1.15rem;}
+.flashface.back{background:var(--teal); color:#fff; transform:rotateY(180deg); font-size:.98rem;}
+.flashnav{display:flex;gap:10px;align-items:center;}
+.flashnav button{background:var(--ink);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:600;}
+.flashnav .count{font-family:var(--font-mono);font-size:.85rem;color:var(--ink-soft);}
+
+/* traps */
+.trap{border:1px solid var(--rule);border-radius:10px;background:#fff;padding:18px 20px;margin-bottom:14px;}
+.trap-chain{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;}
+.trap-step{border-radius:8px;padding:10px 14px;font-size:.88rem;}
+.trap-step.weak{background:var(--law-fail-bg);border-left:4px solid var(--law-fail);}
+.trap-step.why{background:var(--paper);border-left:4px solid var(--ink-soft);}
+.trap-step.better{background:var(--law-stakes-bg);border-left:4px solid var(--law-stakes);}
+.trap-step.expert{background:var(--law-compress-bg);border-left:4px solid var(--law-compress);}
+
+/* cheat sheet */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media (max-width:800px){.cheat-grid{grid-template-columns:1fr;}}
+.cheat-card h4{font-family:var(--font-mono);font-size:.8rem;text-transform:uppercase;color:var(--teal-deep);margin-bottom:10px;}
+.cheat-card ul{margin:0;padding-left:18px;font-size:.9rem;}
+.cheat-card li{margin-bottom:6px;}
+
+footer.sitefoot{padding:40px 48px;text-align:center;color:var(--ink-soft);font-size:.85rem;}
+@media print{
+  .railwrap,.mode-btns,.reveal-btn,.tabstack{display:none;}
+  .panel{display:block !important;}
+}
+</style>
+</head>
+<body class="mode-beginner">
+
+<div class="shell">
+<!-- ============ SIDE RAIL ============ -->
+<div class="railwrap">
+  <div class="rail-brand">
+    <span class="tag">FIELD NOTEBOOK</span>
+    <strong>Hands‑On ML — Ch. 1</strong>
+  </div>
+  <div class="progresswrap">
+    <div class="progress-label"><span>Progress</span><span id="progressPct">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <nav class="toc" id="tocNav" aria-label="Chapter sections">
+    <div class="toc-group-label">Orientation</div>
+    <a href="#objectives">Learning objectives</a>
+    <a href="#story-intro">The story begins</a>
+    <div class="toc-group-label">Foundations</div>
+    <a href="#what-is-ml">What is ML?</a>
+    <a href="#trad-vs-ml">Traditional programming vs. ML</a>
+    <div class="toc-group-label">Types of Machine Learning</div>
+    <a href="#supervision">Supervised / Unsupervised / Semi / RL</a>
+    <a href="#batch-online">Batch vs. Online learning</a>
+    <a href="#instance-model">Instance‑based vs. Model‑based</a>
+    <div class="toc-group-label">The Core Struggle</div>
+    <a href="#generalization">Generalization, Over/Underfitting</a>
+    <a href="#data-quality">Data quality &amp; representation</a>
+    <div class="toc-group-label">Study systems</div>
+    <a href="#visual-recap">Visual recap</a>
+    <a href="#glossary">Glossary</a>
+    <a href="#exercises">Exercises</a>
+    <a href="#interview">Interview prep</a>
+    <a href="#flashcards">Flashcards</a>
+    <a href="#traps">Interview traps</a>
+    <a href="#cheatsheet">Cheat sheet</a>
+    <a href="#final-model">Final mental model</a>
+  </nav>
+  <div class="modewrap">
+    <div class="modewrap-label">Reading mode</div>
+    <div class="mode-btns" role="group" aria-label="Reading mode">
+      <button class="mode-btn active" data-mode="beginner">🧒 Beginner — story‑first</button>
+      <button class="mode-btn" data-mode="technical">🔬 Technical — precise</button>
+      <button class="mode-btn" data-mode="interview">🎤 Interview — condensed</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN ============ -->
+<main>
+<header class="hero">
+  <span class="eyebrow">Chapter 1 · The Machine Learning Landscape</span>
+  <h1>Teaching a computer to notice what you can't write rules for.</h1>
+  <p class="sub">A story‑driven, interactive field notebook for Chapter 1 of <em>Hands‑On Machine Learning with Scikit‑Learn, Keras &amp; TensorFlow</em>. Built around the Five Laws of Learning — predict before you're told, study how ideas break, compress what you understand, feel the stakes, and decide what to trust from AI.</p>
+  <div class="lawstrip">
+    <span class="lawchip predict">⚡ Predict</span>
+    <span class="lawchip fail">🔴 Break</span>
+    <span class="lawchip compress">🟢 Compress</span>
+    <span class="lawchip stakes">🟡 Stakes</span>
+    <span class="lawchip judgment">🟣 Judgment</span>
+  </div>
+  <div class="hero-flow">
+    <span class="step">Predict</span><span class="arrow">→</span>
+    <span class="step">Discover</span><span class="arrow">→</span>
+    <span class="step">Understand</span><span class="arrow">→</span>
+    <span class="step">Break</span><span class="arrow">→</span>
+    <span class="step">Compress</span><span class="arrow">→</span>
+    <span class="step">Apply</span><span class="arrow">→</span>
+    <span class="step">Judge</span><span class="arrow">→</span>
+    <span class="step">Explain</span><span class="arrow">→</span>
+    <span class="step">Interview</span>
+  </div>
+</header>
+
+<!-- ============ OBJECTIVES ============ -->
+<section class="page" id="objectives">
+  <div class="page-kicker">Before you open the notebook</div>
+  <h2>What you'll be able to do by the end</h2>
+  <p class="page-intro">This chapter has no code. It builds the mental model everything else in the book stands on. If you skim it, later chapters will feel like memorizing spells. If you actually build the model in your head, later chapters feel like using tools you already understand.</p>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.8rem;text-transform:uppercase;color:var(--teal-deep);">By the end of this notebook you can</h4>
+      <ul class="keytakeaways">
+        <li>Explain what "learning" means for a computer, in one sentence a non‑programmer would accept.</li>
+        <li>Say precisely when ML beats traditional programming — and when it doesn't.</li>
+        <li>Sort any ML system you meet into supervised / unsupervised / semisupervised / reinforcement, and batch / online, and instance‑based / model‑based.</li>
+        <li>Diagnose overfitting and underfitting from symptoms, not just definitions.</li>
+        <li>Answer 20+ interview questions about the ML landscape without sounding like you memorized a glossary.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.8rem;text-transform:uppercase;color:var(--teal-deep);">How this notebook teaches</h4>
+      <p style="margin-bottom:10px;">Every major idea below follows the same five‑law rhythm. Look for the colored tab stack at the top of each concept card:</p>
+      <div class="termchips">
+        <span class="termchip" style="color:var(--law-predict);">⚡ Predict first</span>
+        <span class="termchip" style="color:var(--law-fail);">🔴 How it breaks</span>
+        <span class="termchip" style="color:var(--law-compress);">🟢 Compress it</span>
+        <span class="termchip" style="color:var(--law-stakes);">🟡 Engineer stakes</span>
+        <span class="termchip" style="color:var(--law-judgment);">🟣 AI vs. human judgment</span>
+      </div>
+      <p style="margin-top:12px;font-size:.9rem;color:var(--ink-soft);">Switch <strong>Reading mode</strong> in the left rail any time — Beginner keeps things story‑first, Technical tightens the language, Interview strips everything down to what you'd actually say out loud in a room.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STORY INTRO ============ -->
+<section class="page" id="story-intro">
+  <div class="page-kicker">🎬 The story that runs through this whole notebook</div>
+  <h2>Meet Priya, who runs the inbox for a small company</h2>
+  <div class="story-box">
+    <p>Priya handles customer support for a 40‑person startup. Every morning her shared inbox has around 800 new emails. Maybe 300 of them are spam — fake invoices, crypto scams, "congratulations you won" nonsense. The rest are real customers who need help.</p>
+    <p>At first, Priya just deletes spam by hand. Then the company grows, the inbox grows, and she can't keep up. So she asks an engineer, Marcus, to write a program that deletes spam automatically.</p>
+    <p>Marcus starts the obvious way: he writes rules. <span class="mono">IF subject contains "you won" THEN mark as spam.</span> <span class="mono">IF sender domain is unfamiliar AND email contains a link THEN flag it.</span> It works — for about two weeks. Then spammers change their wording. They stop saying "you won" and start saying "you've been s3lected." Marcus patches the rule. They switch tactics again. Marcus is now maintaining a list of hundreds of brittle, overlapping rules, and new spam still slips through while some real customer emails get wrongly deleted because they happened to contain the word "free."</p>
+    <p>Marcus is stuck in a loop: <em>observe a new spam trick → write a new rule → spammers adapt → repeat forever.</em> The rules never generalize past the examples he's already seen.</p>
+    <p>Then Marcus tries something different. Instead of writing rules about <em>what spam looks like</em>, he shows a program thousands of emails that Priya has already labeled "spam" or "not spam," and lets the program figure out, on its own, which patterns tend to separate the two groups. He doesn't tell it "watch for the word free." The program discovers, from the data, that certain word combinations, sender patterns, and formatting quirks show up disproportionately in spam — patterns Marcus himself might never have thought to write a rule for.</p>
+    <p>That program is a <strong>machine learning model</strong>. This chapter is about what that sentence actually means, and why it's such a different way of solving a problem than the one Marcus started with.</p>
+  </div>
+  <p style="margin-top:6px;font-weight:600;">We'll come back to Priya's inbox constantly. Every new term below gets mapped onto this same story before it gets a formal definition.</p>
+  <div class="story-mapping">
+    <span class="node">Priya's emails</span><span class="arrow">→</span>
+    <span class="node">Features</span><span class="arrow">→</span>
+    <span class="node">Labels ("spam"/"not spam")</span><span class="arrow">→</span>
+    <span class="node">Training data</span><span class="arrow">→</span>
+    <span class="node">Model</span><span class="arrow">→</span>
+    <span class="node">Prediction on tomorrow's email</span>
+  </div>
+</section>
+
+<!-- ============ WHAT IS ML ============ -->
+<section class="page" id="what-is-ml">
+  <div class="page-kicker">Foundations · Concept 1 of 6</div>
+  <h2>What is Machine Learning, really?</h2>
+  <p class="page-intro">Not "AI that thinks." Not "a robot brain." A precise, almost boring idea — and the boring version is the one that will actually help you reason about real systems.</p>
+
+  <div class="concept" id="c-whatisml">
+    <div class="concept-head">
+      <h3>Machine Learning</h3>
+      <span class="concept-num">Concept 01</span>
+    </div>
+    <div class="tabstack" role="tablist" aria-label="What is ML sections" data-concept="whatisml">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="explain">🧠 Explain</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn terms" data-panel="terms">🧩 Terms</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+
+    <div class="panel active" data-panel="story" data-concept="whatisml">
+      <h4>What Marcus actually built</h4>
+      <div class="story-box">
+        <p>Marcus's second attempt didn't contain a single line saying "the word free is suspicious." Instead, he fed the program 10,000 old emails, each one already tagged by Priya as spam or not‑spam. The program looked for statistical patterns that separated the two piles — and afterward, when a brand‑new email arrived that it had never seen, it could estimate which pile the new email belonged in.</p>
+        <p>Nobody typed out the rule the program ended up using. The rule was <em>discovered</em> from examples, not <em>authored</em> by a human.</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="predict" data-concept="whatisml">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred1">I think a "machine learning model" works by...</label>
+        <textarea id="pred1" placeholder="Type your guess in one or two sentences before reading on."></textarea>
+        <button class="reveal-btn" data-reveal="reveal1">Reveal the correction</button>
+        <div class="reveal-box" id="reveal1">
+          <p><strong>THE CORRECTION:</strong> A machine learning model does not "understand" spam the way a person does, and it isn't a set of programmer‑written if/else rules either. It is a mathematical object — usually full of adjustable numbers called <strong>parameters</strong> — that gets nudged, example by example, until its outputs line up with the correct answers on the data it was shown. "Learning" is a search process: search over possible parameter settings for ones that make the model's guesses match reality as closely as possible.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> Most beginners predict something like "the computer reads the emails and understands language." What actually happens is closer to curve‑fitting at massive scale: the model never "read" anything the way you do — it found numerical patterns correlated with the label. That's why ML models can be both eerily good at pattern‑matching and embarrassingly bad at things a five‑year‑old finds obvious.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="explain" data-concept="whatisml">
+      <h4>Three ways to understand it</h4>
+      <div class="threeways">
+        <div class="waycard"><div class="waylabel">Everyday analogy</div>A cook who has tasted a thousand soups made by a master chef can eventually guess what's missing from soup #1001 without ever seeing a written recipe — they learned the pattern from tasting, not from instructions.</div>
+        <div class="waycard"><div class="waylabel">Story explanation</div>Marcus's program looked at 10,000 emails Priya had already sorted, and adjusted itself until its own spam/not‑spam guesses matched Priya's judgments as often as possible.</div>
+        <div class="waycard" data-mode-block="technical"><div class="waylabel">Technical explanation</div>A machine learning system improves its performance on a task <span class="mono">T</span>, measured by a metric <span class="mono">P</span>, through experience <span class="mono">E</span> (exposure to data) — without being explicitly programmed with the rules for the task.</div>
+      </div>
+      <p style="margin-top:14px;"><strong>Why this matters in real ML:</strong> This definition is the test you apply to decide "is this actually ML, or just a program with the word AI in its marketing?" If there's no measurable task, no performance metric, and no data‑driven improvement, it isn't ML — it's a regular program, however clever.</p>
+      <p><strong>How an interviewer may ask about this:</strong> "How would you explain machine learning to a non‑technical stakeholder in two sentences?" — they're testing whether you can compress the idea without hiding behind jargon.</p>
+    </div>
+
+    <div class="panel" data-panel="viz" data-concept="whatisml">
+      <h4>Visualize it</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mldiag1title">
+          <title id="mldiag1title">Data plus desired outputs go into training, producing a model, which then makes predictions on new data</title>
+          <rect x="10" y="70" width="140" height="80" rx="8" fill="#E9F0FE" stroke="#2F6FED"/>
+          <text x="80" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#1B2430">Past emails</text>
+          <text x="80" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#1B2430">+ Priya's labels</text>
+          <line x1="150" y1="110" x2="230" y2="110" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow1)"/>
+          <rect x="230" y="70" width="140" height="80" rx="8" fill="#E7F5EC" stroke="#2F9E67"/>
+          <text x="300" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" font-weight="700" fill="#1B2430">TRAINING</text>
+          <text x="300" y="122" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#4A5568">(search for patterns)</text>
+          <line x1="370" y1="110" x2="450" y2="110" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow1)"/>
+          <rect x="450" y="70" width="120" height="80" rx="8" fill="#FBF0DC" stroke="#C67D02"/>
+          <text x="510" y="115" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" font-weight="700" fill="#1B2430">MODEL</text>
+          <line x1="570" y1="110" x2="650" y2="110" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow1)"/>
+          <rect x="650" y="70" width="60" height="80" rx="8" fill="#F0EAFB" stroke="#7B4FE0"/>
+          <text x="680" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#1B2430">new</text>
+          <text x="680" y="120" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#1B2430">email</text>
+          <text x="680" y="45" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#4A5568">↓ prediction</text>
+          <defs><marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0E6E62"/></marker></defs>
+        </svg>
+        <figcaption><strong>What should I notice?</strong> The arrow only flows one direction into "Training" — the model never sees new emails during training. Once training is done, the model is frozen and simply applied ("inference") to emails it has never encountered.</figcaption>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="fail" data-concept="whatisml">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why was it invented?</h5>Traditional rule‑writing collapses once a task has too many edge cases for a human to enumerate — spam wording, handwriting styles, speech accents. ML was invented to let the machine find the rule set instead of a person authoring it.</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>It assumes the past data is representative of the future data, and that the labels ("spam"/"not spam") were assigned correctly and consistently in the first place.</div>
+        <div class="fail-item"><h5>How it fails silently</h5>If Priya's old labels are inconsistent (she called similar emails spam one day and not‑spam the next), the model won't throw an error — it will just learn a slightly wrong pattern and confidently apply it forever.</div>
+        <div class="fail-item"><h5>What replaces it when it breaks?</h5>Sometimes the honest answer is: go back to explicit rules for the parts that are genuinely rule‑based (e.g., a hard blocklist of known scam domains) and reserve ML only for the fuzzy, pattern‑heavy part of the problem.</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="terms" data-concept="whatisml">
+      <h4>Important terminology introduced here</h4>
+      <div class="termchips">
+        <span class="termchip">Model</span><span class="termchip">Parameters</span><span class="termchip">Training</span><span class="termchip">Task (T)</span><span class="termchip">Performance measure (P)</span><span class="termchip">Experience (E)</span>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="compress" data-concept="whatisml">
+      <h4>Compress It</h4>
+      <label for="compress1">Explain "machine learning" in one paragraph, like you're talking to a 12‑year‑old:</label>
+      <div class="predict-box"><textarea id="compress1" placeholder="Write your explanation here."></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>ML is a way of programming by example instead of by instruction: you supply data and a goal, and a search process finds a model that achieves the goal on that data — and hopefully on new data too.</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Data + Answers → Training → Model → New guesses</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"Show examples, not instructions, and let the machine find the pattern."</span></div>
+      </div>
+      <p style="margin-top:12px;"><strong>Deep mastery strategy:</strong> Once you deeply understand "a model learns a relationship from labeled examples," almost every later concept in this chapter — supervised learning, overfitting, generalization — is a variation on this one primitive. Keep returning to it.</p>
+    </div>
+
+    <div class="panel" data-panel="stakes" data-concept="whatisml">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">
+        <p>Priya's company ships the spam filter. Three months later, a major customer complains that their contract‑renewal emails keep landing in spam. What went wrong, and whose fault is it — the model's, the data's, or the deployment decision?</p>
+      </div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> Pick any repetitive decision you make (which emails to answer first, which photos to keep), and write down: what would the "features" be, what would the "label" be, and where would you get labeled examples? You don't need to build anything — just sketch the ML framing on paper.</div>
+    </div>
+
+    <div class="panel" data-panel="judgment" data-concept="whatisml">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Drafting boilerplate code for loading and cleaning the email dataset</li><li>Generating synthetic spam examples for testing</li><li>Summarizing documentation for a scikit‑learn classifier</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>Deciding whether "spam vs. not‑spam" is even the right framing of the business problem</li><li>Judging whether the training labels are trustworthy</li><li>Deciding what an acceptable error rate is, and for whom</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "Draft a Python script that loads a CSV of emails and labels, and splits it into train/test sets." <br>✅ What must you verify yourself? — Whether the split respects time order (training only on older emails, testing on newer ones), which matters far more than the AI tool is likely to flag on its own.</div>
+    </div>
+
+    <div class="panel" data-panel="quick" data-concept="whatisml">
+      <h4>Interview Question</h4>
+      <div class="interview-mini">
+        <div class="role">Beginner</div>
+        <p><strong>Q:</strong> How is machine learning different from a normal computer program?</p>
+        <p><strong>Strong answer:</strong> A normal program is given rules and produces answers; a machine learning system is given answers (examples) and produces rules (a model), which it then applies to new, unseen cases.</p>
+      </div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item" data-qc="q1">
+          <p>Which of these is the best one‑line definition of Machine Learning?</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">A program that thinks like a human.</button>
+            <button class="qc-opt" data-correct="true">A system that improves at a task by learning from data instead of following hand‑written rules.</button>
+            <button class="qc-opt" data-correct="false">Any software that uses statistics.</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>ML replaces hand‑written rules with rules discovered from labeled examples.</li>
+        <li>"Learning" = searching for model parameters that fit the training data well.</li>
+        <li>A model is only as trustworthy as the data and labels it learned from.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRADITIONAL VS ML ============ -->
+<section class="page" id="trad-vs-ml">
+  <div class="page-kicker">Foundations · Concept 2 of 6</div>
+  <h2>Traditional programming vs. Machine Learning</h2>
+  <p class="page-intro">Same inputs, opposite direction of information flow. This is the single most useful diagram in the whole chapter.</p>
+
+  <div class="concept" id="c-tradvsml">
+    <div class="concept-head"><h3>Two ways to get a program that "handles spam"</h3><span class="concept-num">Concept 02</span></div>
+    <div class="tabstack" data-concept="tradvsml">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+
+    <div class="panel active" data-panel="story" data-concept="tradvsml">
+      <div class="story-box"><p>Recall Marcus's first attempt: he sat down and typed out rules by hand — <span class="mono">IF ... THEN mark as spam</span>. He was the source of the logic; the computer just executed it faithfully, instantly, and without judgment. When spam evolved, Marcus had to notice the change himself, then edit the program.</p>
+      <p>In the second attempt, Marcus supplied labeled examples instead of logic. The computer worked out the logic. When spam evolves, in principle the model can be retrained on fresh examples without Marcus manually rewriting anything — <em>if</em> someone keeps feeding it fresh, correctly labeled data.</p></div>
+    </div>
+
+    <div class="panel" data-panel="predict" data-concept="tradvsml">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred2">I think traditional programming struggles with problems like spam detection because...</label>
+        <textarea id="pred2" placeholder="Write your prediction."></textarea>
+        <button class="reveal-btn" data-reveal="reveal2">Reveal the correction</button>
+        <div class="reveal-box" id="reveal2">
+          <p><strong>THE CORRECTION:</strong> It's not that traditional programming is "bad" — it's extremely fast and perfectly predictable. The problem is that some tasks (spam wording, natural language, images, human behavior) have far too many exceptions and shifting patterns for a person to enumerate as explicit rules. The rules would need constant, exhausting manual maintenance.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> ML is not "better programming" in general — for problems with a clean, stable, known logic (tax calculations, unit conversions), traditional code is simpler, cheaper, faster, and far easier to debug than an ML model. ML earns its cost only when the rules are too complex or too unstable for a human to hand‑write.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="viz" data-concept="tradvsml">
+      <h4>Visualize it</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tvmtitle">
+          <title id="tvmtitle">Traditional programming feeds rules and data in to get answers out; machine learning feeds data and answers in to get rules out</title>
+          <defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0E6E62"/></marker></defs>
+          <text x="10" y="26" font-family="Fraunces" font-size="15" font-weight="600" fill="#1B2430">Traditional programming</text>
+          <rect x="10" y="40" width="130" height="50" rx="6" fill="#E9F0FE" stroke="#2F6FED"/><text x="75" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="11">Rules</text>
+          <rect x="10" y="100" width="130" height="50" rx="6" fill="#E9F0FE" stroke="#2F6FED"/><text x="75" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="11">Data</text>
+          <line x1="140" y1="90" x2="220" y2="90" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow2)"/>
+          <rect x="220" y="65" width="120" height="50" rx="6" fill="#FBF0DC" stroke="#C67D02"/><text x="280" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="700">COMPUTER</text>
+          <line x1="340" y1="90" x2="420" y2="90" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow2)"/>
+          <rect x="420" y="65" width="110" height="50" rx="6" fill="#F0EAFB" stroke="#7B4FE0"/><text x="475" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="11">Answers</text>
+
+          <text x="10" y="180" font-family="Fraunces" font-size="15" font-weight="600" fill="#1B2430">Machine Learning</text>
+          <rect x="10" y="194" width="130" height="50" rx="6" fill="#F0EAFB" stroke="#7B4FE0"/><text x="75" y="224" text-anchor="middle" font-family="IBM Plex Mono" font-size="11">Answers</text>
+          <rect x="10" y="194" width="0" height="0"/>
+          <rect x="10" y="140" width="0" height="0"/>
+          <text x="75" y="255" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">(+ Data, not shown)</text>
+          <line x1="140" y1="219" x2="220" y2="219" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow2)"/>
+          <rect x="220" y="194" width="120" height="50" rx="6" fill="#FBF0DC" stroke="#C67D02"/><text x="280" y="224" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="700">COMPUTER</text>
+          <line x1="340" y1="219" x2="420" y2="219" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow2)"/>
+          <rect x="420" y="194" width="110" height="50" rx="6" fill="#E9F0FE" stroke="#2F6FED"/><text x="475" y="224" text-anchor="middle" font-family="IBM Plex Mono" font-size="11">Rules (Model)</text>
+        </svg>
+        <p class="notice-box"><strong>What should I notice?</strong> The two inputs on the left swap roles with the output on the right. Traditional programming: <span class="mono">Rules + Data → Answers</span>. Machine Learning: <span class="mono">Answers + Data → Rules</span>. Same three ingredients, information flows the opposite way.</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="fail" data-concept="tradvsml">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why was ML invented?</h5>To handle tasks where rules are too numerous, subtle, or fast‑changing for a person to author and maintain by hand.</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>That the "answers" (labels) fed in are actually correct, and that there's enough data covering the relevant variety of cases.</div>
+        <div class="fail-item"><h5>How it fails silently</h5>Using ML for a problem that actually has a simple, stable rule (e.g., "flag any email from this exact blocked domain") adds needless complexity, cost, and unpredictability compared to just writing that one rule.</div>
+        <div class="fail-item"><h5>What replaces it when it breaks?</h5>A hybrid: keep explicit rules for the crisp, stable parts of a problem (blocklists, legal thresholds) and reserve ML only for the fuzzy parts (wording patterns, tone).</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="compress" data-concept="tradvsml">
+      <h4>Compress It</h4>
+      <div class="predict-box"><label for="compress2">Explain the difference to a 12‑year‑old:</label><textarea id="compress2"></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>Traditional code executes logic a human wrote. ML infers logic from labeled examples a human collected.</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Rules+Data→Answers <em>vs.</em> Answers+Data→Rules</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"In ML, the data writes the program."</span></div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="stakes" data-concept="tradvsml">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">A junior engineer proposes training an ML model to check whether a US ZIP code is valid. Why is this a wasteful, possibly risky choice compared to a five‑line regular expression?</div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> List three tasks from your own life/work. For each, decide: "clean, stable rule" (write code) or "fuzzy, example‑driven pattern" (consider ML). Justify each choice in one sentence.</div>
+    </div>
+
+    <div class="panel" data-panel="judgment" data-concept="tradvsml">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Sketching a first-pass decision: "is this task rule‑based or pattern‑based?"</li><li>Generating example rule sets to see how unwieldy they'd get</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>The final call on whether the added complexity of ML is worth it for this specific business problem</li><li>Estimating whether enough labeled data actually exists</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "Give me arguments for and against using ML instead of a rules engine for X." <br>✅ What must you verify yourself? — Whether the AI's assumption about data availability matches your real situation; it will happily assume you have data you don't.</div>
+    </div>
+
+    <div class="panel" data-panel="quick" data-concept="tradvsml">
+      <h4>Interview Question</h4>
+      <div class="interview-mini"><div class="role">Intermediate</div><p><strong>Q:</strong> Give an example of a problem where you would <em>not</em> use machine learning, and explain why.</p><p><strong>Strong answer:</strong> Any problem with a small, stable, fully known rule set — e.g., calculating sales tax, validating an email address format, converting currencies using a fixed API rate — because a deterministic function is simpler, cheaper, and perfectly predictable, with none of ML's data, training, or drift concerns.</p></div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item">
+          <p>In the Machine Learning diagram, what goes IN alongside the data?</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">Rules</button>
+            <button class="qc-opt" data-correct="true">Answers (labels)</button>
+            <button class="qc-opt" data-correct="false">Nothing — only data goes in</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>Traditional programming: Rules + Data → Answers.</li>
+        <li>Machine Learning: Answers + Data → Rules (a model).</li>
+        <li>Choose ML only when rules are too complex, numerous, or unstable to hand‑write.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUPERVISION TYPES ============ -->
+<section class="page" id="supervision">
+  <div class="page-kicker">Types of Machine Learning · Concept 3 of 6</div>
+  <h2>How much "answer key" does the model get?</h2>
+  <p class="page-intro">Machine learning systems are usually sorted by how much supervision — labeled answers — they receive during training. This is the axis interviewers ask about most.</p>
+
+  <div class="concept" id="c-supervision">
+    <div class="concept-head"><h3>Supervised, Unsupervised, Semisupervised, Reinforcement</h3><span class="concept-num">Concept 03</span></div>
+    <div class="tabstack" data-concept="supervision">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize + Explain</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+
+    <div class="panel active" data-panel="story" data-concept="supervision">
+      <div class="story-box">
+        <p><strong>Supervised:</strong> Priya labeled every email "spam" or "not spam" before Marcus trained anything. The model always had the correct answer to learn from — that's supervised learning.</p>
+        <p><strong>Unsupervised:</strong> Later, Priya wants to know what "kinds" of customer emails exist — but nobody has labeled them by topic. Marcus runs an algorithm that groups similar emails together (billing questions cluster together, bug reports cluster together) without ever being told what the groups should be. The machine discovers structure with no answer key.</p>
+        <p><strong>Semisupervised:</strong> Priya has time to label only 500 emails out of 50,000. Marcus uses a technique that leans on the small labeled set plus the huge unlabeled set together, getting more value than the 500 labels alone would give.</p>
+        <p><strong>Reinforcement:</strong> Now imagine an entirely different setup — a support chatbot that decides, message by message, how to respond, and gets a reward signal (customer satisfaction score) after the conversation ends. It's not shown "correct" responses in advance; it learns by trying actions and observing rewards over time.</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="predict" data-concept="supervision">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred3">I think "unsupervised learning" means...</label>
+        <textarea id="pred3" placeholder="Write your prediction."></textarea>
+        <button class="reveal-btn" data-reveal="reveal3">Reveal the correction</button>
+        <div class="reveal-box" id="reveal3">
+          <p><strong>THE CORRECTION:</strong> "Unsupervised" doesn't mean "no human involvement" — a person still chose the data, the features, and how to interpret the output. It means the training data has no target labels: the algorithm isn't told the "right answer" for any example, only the raw data itself.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> Beginners often assume unsupervised learning is "smarter" because it needs no labels. In practice it's usually harder to evaluate — there's no ground truth to check the output against, so judging whether the discovered groups are "good" is often subjective.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="viz" data-concept="supervision">
+      <h4>Visualize + Explain</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="suptitle">
+          <title id="suptitle">Supervised learning uses labeled data with a target answer; unsupervised learning finds structure in unlabeled data</title>
+          <text x="10" y="24" font-family="Fraunces" font-size="14" font-weight="600">Supervised: labeled data</text>
+          <circle cx="40" cy="60" r="9" fill="#2F6FED"/><circle cx="70" cy="80" r="9" fill="#2F6FED"/><circle cx="55" cy="100" r="9" fill="#2F6FED"/>
+          <circle cx="160" cy="60" r="9" fill="#C67D02"/><circle cx="190" cy="90" r="9" fill="#C67D02"/><circle cx="150" cy="100" r="9" fill="#C67D02"/>
+          <text x="35" y="130" font-family="IBM Plex Mono" font-size="10" fill="#2F6FED">= spam</text>
+          <text x="150" y="130" font-family="IBM Plex Mono" font-size="10" fill="#C67D02">= not spam</text>
+          <line x1="230" y1="30" x2="230" y2="150" stroke="#C9D1CC" stroke-width="1"/>
+          <text x="260" y="24" font-family="Fraunces" font-size="14" font-weight="600">Unsupervised: unlabeled data</text>
+          <circle cx="290" cy="60" r="9" fill="#8A6D3B"/><circle cx="320" cy="80" r="9" fill="#8A6D3B"/><circle cx="305" cy="100" r="9" fill="#8A6D3B"/>
+          <circle cx="410" cy="55" r="9" fill="#8A6D3B"/><circle cx="440" cy="90" r="9" fill="#8A6D3B"/><circle cx="400" cy="95" r="9" fill="#8A6D3B"/>
+          <ellipse cx="305" cy="80" rx="42" ry="35" fill="none" stroke="#2F9E67" stroke-dasharray="4 3" stroke-width="2"/>
+          <ellipse cx="418" cy="80" rx="42" ry="35" fill="none" stroke="#2F9E67" stroke-dasharray="4 3" stroke-width="2"/>
+          <text x="255" y="130" font-family="IBM Plex Mono" font-size="10" fill="#4A5568">all one color — no labels;</text>
+          <text x="255" y="144" font-family="IBM Plex Mono" font-size="10" fill="#4A5568">dashed circles = discovered clusters</text>
+        </svg>
+        <p class="notice-box"><strong>What should I notice?</strong> On the left, color (label) is given before training. On the right, color is uniform — the model itself proposes the grouping (dashed ellipses), and it has no name for what a group "means."</p>
+      </div>
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card"><h4 style="font-size:.85rem;font-family:var(--font-mono);color:var(--teal-deep);">Semisupervised — real examples</h4>Photo apps that recognize the same face across your photo library after you tag it once; language models pretrained on huge unlabeled text, then fine‑tuned on a small labeled set.</div>
+        <div class="card"><h4 style="font-size:.85rem;font-family:var(--font-mono);color:var(--teal-deep);">Reinforcement learning — real examples</h4>Game‑playing agents (Chess, Go), robotics control, and recommendation systems that adjust based on long‑term engagement rather than a single labeled "correct" recommendation.</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="fail" data-concept="supervision">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why was this distinction invented?</h5>Different problems naturally come with different amounts of labeled data, so practitioners needed a vocabulary to match the technique to what's actually available.</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>Supervised learning assumes labels are accurate and consistent. Unsupervised learning assumes that "similar" by whatever mathematical distance you chose actually matches what a human would consider meaningfully similar.</div>
+        <div class="fail-item"><h5>How it fails silently</h5>An unsupervised clustering can produce confident‑looking groups that are statistically real but practically meaningless (e.g., clustering emails by length instead of by topic) — and nothing in the algorithm warns you that the grouping isn't useful.</div>
+        <div class="fail-item"><h5>What replaces it when it breaks?</h5>Add a small labeled sample to sanity‑check unsupervised output (turning it semisupervised in practice), or bring in a human reviewer to validate clusters before acting on them.</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="compress" data-concept="supervision">
+      <h4>Compress It</h4>
+      <div class="predict-box"><label for="compress3">Explain the four types to a 12‑year‑old:</label><textarea id="compress3"></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>They differ only in how much of the "correct answer" the model is given: all of it (supervised), none of it (unsupervised), a little of it (semisupervised), or a delayed reward instead of an answer at all (reinforcement).</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Full labels → Some labels → No labels → Reward signal only</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"It's all about how much of the answer key the model gets."</span></div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="stakes" data-concept="supervision">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">A team applies unsupervised clustering to segment customers, then makes pricing decisions based on the clusters — but never checks whether the clusters correspond to anything a human stakeholder recognizes. Sales starts contradicting the "segments." What's the root cause?</div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> Take any dataset you have access to (even a spreadsheet of your own expenses). Decide: could you frame a supervised question, an unsupervised question, and describe what a reward signal for a reinforcement‑learning version would even look like?</div>
+    </div>
+
+    <div class="panel" data-panel="judgment" data-concept="supervision">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Suggesting which category (supervised/unsupervised/etc.) fits a described problem</li><li>Generating starter code for a clustering algorithm</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>Validating that discovered clusters are meaningful, not just statistically distinct</li><li>Deciding whether the cost of labeling data is worth the accuracy gain over unsupervised or semisupervised approaches</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "Is this problem better framed as supervised or unsupervised, given I have 200 labeled examples and 40,000 unlabeled ones?" <br>✅ What must you verify yourself? — Whether the 200 labels are actually representative, since the AI can't know that about your specific dataset.</div>
+    </div>
+
+    <div class="panel" data-panel="quick" data-concept="supervision">
+      <h4>Interview Question</h4>
+      <div class="interview-mini"><div class="role">Intermediate</div><p><strong>Q:</strong> You have 50,000 product images and only 300 are labeled with product category. What approach would you consider, and why?</p><p><strong>Strong answer:</strong> Semisupervised learning — use the small labeled set to guide learning while leveraging the structure in the large unlabeled set, rather than throwing away 49,700 images or relying on 300 labels alone.</p></div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item">
+          <p>A chess‑playing agent that improves by playing games and receiving win/loss signals is an example of:</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">Supervised learning</button>
+            <button class="qc-opt" data-correct="false">Unsupervised learning</button>
+            <button class="qc-opt" data-correct="true">Reinforcement learning</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>Supervised = every example has a label; Unsupervised = no labels at all.</li>
+        <li>Semisupervised = a small labeled set + a large unlabeled set used together.</li>
+        <li>Reinforcement learning = an agent learns from delayed rewards, not per‑example labels.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BATCH VS ONLINE ============ -->
+<section class="page" id="batch-online">
+  <div class="page-kicker">Types of Machine Learning · Concept 4 of 6</div>
+  <h2>Does the model learn all at once, or continuously?</h2>
+  <p class="page-intro">This axis is about <em>when</em> learning happens, not what kind of supervision is used.</p>
+
+  <div class="concept" id="c-batchonline">
+    <div class="concept-head"><h3>Batch learning vs. Online learning</h3><span class="concept-num">Concept 04</span></div>
+    <div class="tabstack" data-concept="batchonline">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+    <div class="panel active" data-panel="story" data-concept="batchonline">
+      <div class="story-box">
+        <p>Marcus's first spam model is trained once a month: every four weeks, he gathers the newest labeled emails, retrains the whole model from scratch on all historical data, and deploys the new version. Between retrainings, the model never changes — that's <strong>batch learning</strong>.</p>
+        <p>Six months later, spam tactics are shifting weekly, and monthly retraining is too slow. Marcus switches to a system that updates itself incrementally every time a new labeled email arrives, a little at a time, without redoing the whole process — that's <strong>online learning</strong>. ("Online" here has nothing to do with the internet — it means learning incrementally, on a stream of data.)</p>
+      </div>
+    </div>
+    <div class="panel" data-panel="predict" data-concept="batchonline">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred4">I think "online learning" means...</label>
+        <textarea id="pred4" placeholder="Write your prediction."></textarea>
+        <button class="reveal-btn" data-reveal="reveal4">Reveal the correction</button>
+        <div class="reveal-box" id="reveal4">
+          <p><strong>THE CORRECTION:</strong> Online learning means the model updates incrementally as new data arrives — a small step per new example (or small batch), rather than retraining from scratch on the full dataset each time.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> Many beginners assume "online" refers to a model running on a web server. It actually describes the <em>training schedule</em>, and a batch‑trained model can absolutely be served "online" (i.e., over the internet) — the two meanings of "online" are unrelated.</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-panel="viz" data-concept="batchonline">
+      <h4>Visualize it</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="botitle">
+          <title id="botitle">Batch learning retrains periodically on all data at once; online learning updates continuously as small chunks of data arrive</title>
+          <text x="10" y="20" font-family="Fraunces" font-size="14" font-weight="600">Batch</text>
+          <rect x="10" y="30" width="60" height="30" fill="#E9F0FE" stroke="#2F6FED"/><text x="40" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">Train</text>
+          <rect x="90" y="30" width="140" height="30" fill="#FBF0DC" stroke="#C67D02"/><text x="160" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">Deployed (frozen 4 wks)</text>
+          <rect x="250" y="30" width="60" height="30" fill="#E9F0FE" stroke="#2F6FED"/><text x="280" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">Retrain</text>
+          <rect x="330" y="30" width="140" height="30" fill="#FBF0DC" stroke="#C67D02"/><text x="400" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">Deployed (frozen 4 wks)</text>
+          <text x="10" y="100" font-family="Fraunces" font-size="14" font-weight="600">Online</text>
+          <rect x="10" y="110" width="460" height="30" fill="#E7F5EC" stroke="#2F9E67"/>
+          <text x="240" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">continuous small updates as data streams in →→→→→→→→→</text>
+        </svg>
+        <p class="notice-box"><strong>What should I notice?</strong> Batch learning has visible "steps" (frozen, then a retrain event, then frozen again). Online learning is one continuous line — there's no single moment where "training" starts or stops.</p>
+      </div>
+    </div>
+    <div class="panel" data-panel="fail" data-concept="batchonline">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why was online learning invented?</h5>For settings where data arrives continuously and retraining from scratch each time would be too slow, too expensive, or where the data stream is too large to store entirely (e.g., real‑time sensor data).</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>Online learning assumes each new example is reasonably trustworthy — a bad or adversarial example can nudge the model wrong immediately.</div>
+        <div class="fail-item"><h5>How it fails silently</h5>An online model can be gradually "poisoned" by a stream of bad data (accidental or adversarial) with no single alarming event — just slow, silent drift in quality that's hard to notice day‑to‑day.</div>
+        <div class="fail-item"><h5>What replaces it when it breaks?</h5>Add monitoring dashboards that track performance over time, cap the learning rate so single examples can't swing the model too far, and keep the ability to roll back to a previous checkpoint.</div>
+      </div>
+    </div>
+    <div class="panel" data-panel="compress" data-concept="batchonline">
+      <h4>Compress It</h4>
+      <div class="predict-box"><label for="compress4">Explain the difference to a 12‑year‑old:</label><textarea id="compress4"></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>Batch = retrain from scratch periodically on the full dataset. Online = update the existing model incrementally as new data streams in.</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Batch: Train → Freeze → Retrain → Freeze. Online: continuous small nudges.</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"Batch learns in big meals; online learns by grazing."</span></div>
+      </div>
+    </div>
+    <div class="panel" data-panel="stakes" data-concept="batchonline">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">An online‑learning fraud model starts silently degrading after a bug feeds it mislabeled transactions for six hours before anyone notices. What monitoring should have caught this sooner, and how does that differ from what you'd need for a batch system?</div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> Sketch a monitoring dashboard (on paper) for an online‑learning system: what three metrics would alert you to silent drift before it caused real damage?</div>
+    </div>
+    <div class="panel" data-panel="judgment" data-concept="batchonline">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Drafting a retraining pipeline script for batch learning</li><li>Suggesting a starter learning‑rate schedule for an online learner</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>Deciding how much a single new example is allowed to move the model</li><li>Setting up rollback and monitoring before going live, not after</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "What monitoring metrics are standard for detecting drift in an online‑learning fraud model?" <br>✅ What must you verify yourself? — Whether those generic metrics actually catch the specific failure modes of your data pipeline.</div>
+    </div>
+    <div class="panel" data-panel="quick" data-concept="batchonline">
+      <h4>Interview Question</h4>
+      <div class="interview-mini"><div class="role">Beginner</div><p><strong>Q:</strong> What does "online" mean in "online learning"?</p><p><strong>Strong answer:</strong> It refers to incremental training on a continuous stream of data, not to whether the model is deployed over the internet.</p></div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item"><p>A model retrained from scratch every night on the full dataset is doing:</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="true">Batch learning</button>
+            <button class="qc-opt" data-correct="false">Online learning</button>
+            <button class="qc-opt" data-correct="false">Reinforcement learning</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>Batch = full retrain periodically; online = incremental updates continuously.</li>
+        <li>"Online" describes the training schedule, not internet deployment.</li>
+        <li>Online learning needs active drift monitoring since bad data degrades it silently.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTANCE VS MODEL BASED ============ -->
+<section class="page" id="instance-model">
+  <div class="page-kicker">Types of Machine Learning · Concept 5 of 6</div>
+  <h2>Does it memorize examples, or build a general rule?</h2>
+  <p class="page-intro">This axis is about <em>how</em> the system generalizes from training data to new cases.</p>
+
+  <div class="concept" id="c-instmodel">
+    <div class="concept-head"><h3>Instance‑based learning vs. Model‑based learning</h3><span class="concept-num">Concept 05</span></div>
+    <div class="tabstack" data-concept="instmodel">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+    <div class="panel active" data-panel="story" data-concept="instmodel">
+      <div class="story-box">
+        <p>Suppose Marcus builds a simpler spam checker: for a new email, find the most similar emails already in Priya's labeled history, and copy whatever label the majority of those similar emails have. He never builds an equation — he just keeps all the old emails around and compares new ones against them directly. That's <strong>instance‑based learning</strong>: generalizing by measuring similarity to stored examples.</p>
+        <p>Alternatively, Marcus could fit a mathematical formula — a set of weights on features like "contains a link" or "sender is unknown" — that outputs a spam score. Once trained, he can throw away the original 10,000 emails entirely; the formula itself (the model) is all that's needed to score new emails. That's <strong>model‑based learning</strong>: generalizing by building a general‑purpose function.</p>
+      </div>
+    </div>
+    <div class="panel" data-panel="predict" data-concept="instmodel">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred5">I think instance‑based learning is different from model‑based learning because...</label>
+        <textarea id="pred5" placeholder="Write your prediction."></textarea>
+        <button class="reveal-btn" data-reveal="reveal5">Reveal the correction</button>
+        <div class="reveal-box" id="reveal5">
+          <p><strong>THE CORRECTION:</strong> Instance‑based learning keeps the training examples themselves and compares new inputs against them at prediction time (e.g., "k‑nearest neighbors"). Model‑based learning compresses the training data into a compact function with parameters, and can discard the original data afterward.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> Instance‑based learning does still generalize — it's not "just memorization" in the bad sense — but it needs the whole dataset around at prediction time and can be slow or memory‑hungry as the dataset grows, unlike a trained model‑based system.</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-panel="viz" data-concept="instmodel">
+      <h4>Visualize it</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="imtitle">
+          <title id="imtitle">Instance-based learning compares a new point against stored neighbors; model-based learning fits a line or curve through the data</title>
+          <text x="10" y="20" font-family="Fraunces" font-size="14" font-weight="600">Instance-based (nearest neighbors)</text>
+          <circle cx="40" cy="60" r="7" fill="#2F6FED"/><circle cx="70" cy="90" r="7" fill="#2F6FED"/><circle cx="90" cy="60" r="7" fill="#C67D02"/>
+          <circle cx="130" cy="100" r="7" fill="#C67D02"/><circle cx="60" cy="120" r="7" fill="#2F6FED"/><circle cx="150" cy="70" r="7" fill="#C67D02"/>
+          <circle cx="95" cy="85" r="9" fill="none" stroke="#7B4FE0" stroke-width="2"/>
+          <circle cx="95" cy="85" r="34" fill="none" stroke="#7B4FE0" stroke-dasharray="3 3" stroke-width="1.5"/>
+          <text x="10" y="150" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">new point (purple) checks nearest stored neighbors</text>
+          <line x1="220" y1="10" x2="220" y2="170" stroke="#C9D1CC"/>
+          <text x="250" y="20" font-family="Fraunces" font-size="14" font-weight="600">Model-based (fitted line)</text>
+          <circle cx="270" cy="130" r="5" fill="#4A5568"/><circle cx="300" cy="100" r="5" fill="#4A5568"/><circle cx="330" cy="110" r="5" fill="#4A5568"/>
+          <circle cx="360" cy="70" r="5" fill="#4A5568"/><circle cx="400" cy="60" r="5" fill="#4A5568"/><circle cx="430" cy="40" r="5" fill="#4A5568"/>
+          <line x1="260" y1="140" x2="450" y2="30" stroke="#2F9E67" stroke-width="3"/>
+          <text x="250" y="150" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">a single formula (line) replaces the raw data points</text>
+        </svg>
+        <p class="notice-box"><strong>What should I notice?</strong> On the left, prediction requires the original scattered points to still exist. On the right, once the green line is fit, the individual gray points could be deleted — the line itself is the "model."</p>
+      </div>
+    </div>
+    <div class="panel" data-panel="fail" data-concept="instmodel">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why do both approaches exist?</h5>Instance‑based methods are simple and need no assumption about the shape of the pattern; model‑based methods are faster at prediction time and often generalize better once enough data is available.</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>Instance‑based learning assumes "similar inputs behave similarly," which quietly depends on choosing a good similarity/distance measure. Model‑based learning assumes the chosen function shape (e.g., a straight line) is a reasonable approximation of reality.</div>
+        <div class="fail-item"><h5>How it fails silently</h5>If you pick a straight‑line model for a pattern that's actually curved, the model will still output confident numbers everywhere — it just won't be accurate, and nothing about the process warns you.</div>
+        <div class="fail-item"><h5>What replaces it when it breaks?</h5>Try a more flexible model family (curves instead of straight lines), or switch to instance‑based methods when the true pattern is too irregular for any simple formula to capture.</div>
+      </div>
+    </div>
+    <div class="panel" data-panel="compress" data-concept="instmodel">
+      <h4>Compress It</h4>
+      <div class="predict-box"><label for="compress5">Explain the difference to a 12‑year‑old:</label><textarea id="compress5"></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>Instance‑based: keep the examples, compare new cases to them. Model‑based: compress examples into a formula, throw the examples away.</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Stored neighbors + distance check <em>vs.</em> fitted line/formula</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"Remember the examples, or remember the pattern."</span></div>
+      </div>
+    </div>
+    <div class="panel" data-panel="stakes" data-concept="instmodel">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">A nearest‑neighbor recommendation system becomes too slow as the product catalog grows from 10,000 to 10 million items, because every prediction compares against the whole catalog. What trade‑off does switching to a model‑based approach involve?</div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> Pick a small dataset (even 10 rows you make up). Manually do a "nearest neighbor" prediction for a new row, then sketch what a simple linear formula fitting the same data might look like. Compare the effort each required.</div>
+    </div>
+    <div class="panel" data-panel="judgment" data-concept="instmodel">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Implementing a k‑nearest‑neighbors baseline quickly</li><li>Drafting code to fit a simple linear model for comparison</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>Choosing a distance/similarity metric that makes sense for the actual data</li><li>Deciding whether a straight‑line assumption is reasonable for this problem, or whether it's oversimplifying</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "Compare k‑nearest‑neighbors and linear regression for this dataset, including inference‑time cost." <br>✅ What must you verify yourself? — Whether the "similarity" the AI assumes matches what actually makes two examples similar in your domain.</div>
+    </div>
+    <div class="panel" data-panel="quick" data-concept="instmodel">
+      <h4>Interview Question</h4>
+      <div class="interview-mini"><div class="role">Advanced</div><p><strong>Q:</strong> Why might a model‑based approach outperform instance‑based learning as a dataset grows very large?</p><p><strong>Strong answer:</strong> Model‑based approaches compress patterns into fixed‑size parameters, so prediction time and memory stay constant regardless of dataset size, and the fitted function can smooth out noise rather than being swayed by whichever raw neighbors happen to be nearby.</p></div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item"><p>Which approach can, in principle, discard the original training examples after training?</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">Instance-based learning</button>
+            <button class="qc-opt" data-correct="true">Model-based learning</button>
+            <button class="qc-opt" data-correct="false">Neither</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>Instance-based learning compares new cases against stored examples via similarity.</li>
+        <li>Model-based learning fits a general function and can discard raw examples afterward.</li>
+        <li>The choice trades off prediction speed, memory, and how well irregular patterns are captured.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GENERALIZATION ============ -->
+<section class="page" id="generalization">
+  <div class="page-kicker">The Core Struggle · Concept 6 of 6</div>
+  <h2>Generalization: the entire point of ML</h2>
+  <p class="page-intro">A model that only works on data it has already seen is useless. Everything in this section is about the gap between "fits the training data" and "works on new data."</p>
+
+  <div class="concept" id="c-generalization">
+    <div class="concept-head"><h3>Generalization, Overfitting &amp; Underfitting</h3><span class="concept-num">Concept 06 · The most important one</span></div>
+    <div class="tabstack" data-concept="generalization">
+      <button class="tabbtn story active" data-panel="story">🎬 Story</button>
+      <button class="tabbtn predict" data-panel="predict">⚡ Predict</button>
+      <button class="tabbtn viz" data-panel="explain">🧠 Explain</button>
+      <button class="tabbtn viz" data-panel="viz">👀 Visualize</button>
+      <button class="tabbtn fail" data-panel="fail">🔴 Breaks</button>
+      <button class="tabbtn terms" data-panel="terms">🧩 Terms</button>
+      <button class="tabbtn compress" data-panel="compress">🟢 Compress</button>
+      <button class="tabbtn stakes" data-panel="stakes">🟡 Stakes</button>
+      <button class="tabbtn judgment" data-panel="judgment">🟣 AI/Human</button>
+      <button class="tabbtn quick" data-panel="quick">🎤 Interview + Check</button>
+    </div>
+
+    <div class="panel active" data-panel="story" data-concept="generalization">
+      <div class="story-box">
+        <p>Marcus checks his spam model's accuracy on the same 10,000 emails it trained on: 99.8% correct. He's thrilled — until he deploys it and accuracy on tomorrow's brand‑new emails is only 81%. What happened?</p>
+        <p>The model didn't learn "what spam generally looks like." It partly <strong>memorized</strong> quirks specific to those exact 10,000 emails — including accidental patterns that had nothing to do with spam (like a particular timestamp format that happened to correlate with spam purely by coincidence in that batch). That's <strong>overfitting</strong>: the model fits the training data too closely, including its noise, and fails to generalize.</p>
+        <p>The opposite problem: if Marcus's model is far too simple — say, it only ever looks at email length and nothing else — it will do poorly even on the training data itself, because it's not flexible enough to capture the real pattern. That's <strong>underfitting</strong>.</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="predict" data-concept="generalization">
+      <h4>Before You Learn: What Do You Think?</h4>
+      <div class="predict-box">
+        <label for="pred6">I think a model that gets 99.8% accuracy on its training data will perform on new data...</label>
+        <textarea id="pred6" placeholder="Write your prediction (better / worse / the same, and why)."></textarea>
+        <button class="reveal-btn" data-reveal="reveal6">Reveal the correction</button>
+        <div class="reveal-box" id="reveal6">
+          <p><strong>THE CORRECTION:</strong> Near‑perfect training accuracy is often a warning sign, not a triumph. It frequently means the model has memorized noise specific to the training set rather than learning the general pattern — so performance on new data is often noticeably lower, sometimes dramatically so.</p>
+          <div class="surprise-box"><strong>WHAT SHOULD SURPRISE YOU:</strong> Beginners almost always predict "higher training accuracy = better model." The corrected intuition: what matters is performance on <em>data the model hasn't seen</em>, which is why practitioners always hold out a separate test set rather than trusting training accuracy alone.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="explain" data-concept="generalization">
+      <h4>Three ways to understand it</h4>
+      <div class="threeways">
+        <div class="waycard"><div class="waylabel">Everyday analogy</div>A student who memorizes the exact answers to last year's practice exam will ace that specific exam again, but bomb this year's exam because the questions changed. A student who understood the underlying concepts does well on both.</div>
+        <div class="waycard"><div class="waylabel">Story explanation</div>Marcus's model memorized quirks of the exact 10,000 training emails instead of learning general spam patterns — so it stumbled on tomorrow's different emails.</div>
+        <div class="waycard"><div class="waylabel">Technical explanation</div><span class="mono">Generalization error</span> (or out‑of‑sample error) is the model's error rate on new, unseen data, estimated using a held‑out <span class="mono">test set</span>. A large gap between low training error and high test error is the signature of overfitting.</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="viz" data-concept="generalization">
+      <h4>Visualize it</h4>
+      <div class="diagram-card">
+        <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="overfittitle">
+          <title id="overfittitle">Underfitting is a line too simple to follow the data, a good fit follows the trend smoothly, and overfitting wiggles through every single point including noise</title>
+          <text x="60" y="20" text-anchor="middle" font-family="Fraunces" font-size="13" font-weight="600">Underfitting</text>
+          <g>
+            <circle cx="30" cy="120" r="4" fill="#4A5568"/><circle cx="55" cy="90" r="4" fill="#4A5568"/><circle cx="80" cy="130" r="4" fill="#4A5568"/>
+            <circle cx="105" cy="80" r="4" fill="#4A5568"/><circle cx="130" cy="115" r="4" fill="#4A5568"/>
+            <line x1="15" y1="110" x2="145" y2="100" stroke="#C1443C" stroke-width="3"/>
+          </g>
+          <text x="60" y="205" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">too simple — misses the pattern</text>
+
+          <text x="290" y="20" text-anchor="middle" font-family="Fraunces" font-size="13" font-weight="600">Good fit</text>
+          <g>
+            <circle cx="250" cy="120" r="4" fill="#4A5568"/><circle cx="275" cy="90" r="4" fill="#4A5568"/><circle cx="300" cy="130" r="4" fill="#4A5568"/>
+            <circle cx="325" cy="80" r="4" fill="#4A5568"/><circle cx="350" cy="115" r="4" fill="#4A5568"/>
+            <path d="M235,125 Q290,75 365,105" stroke="#2F9E67" stroke-width="3" fill="none"/>
+          </g>
+          <text x="290" y="205" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">follows the trend, ignores noise</text>
+
+          <text x="530" y="20" text-anchor="middle" font-family="Fraunces" font-size="13" font-weight="600">Overfitting</text>
+          <g>
+            <circle cx="470" cy="120" r="4" fill="#4A5568"/><circle cx="495" cy="90" r="4" fill="#4A5568"/><circle cx="520" cy="130" r="4" fill="#4A5568"/>
+            <circle cx="545" cy="80" r="4" fill="#4A5568"/><circle cx="570" cy="115" r="4" fill="#4A5568"/>
+            <path d="M455,122 C470,118 480,122 495,88 C505,68 512,132 520,130 C528,128 535,78 545,80 C555,82 562,118 585,110" stroke="#7B4FE0" stroke-width="3" fill="none"/>
+          </g>
+          <text x="530" y="205" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">wiggles through every point, incl. noise</text>
+        </svg>
+        <p class="notice-box"><strong>What should I notice?</strong> The overfit curve on the right passes exactly through every single dot — it looks "more accurate" on this data, but that jagged shape will make wild, wrong guesses on any new dot that lands between the training points.</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="fail" data-concept="generalization">
+      <h4>How This Breaks</h4>
+      <div class="fail-grid">
+        <div class="fail-item"><h5>Why does overfitting happen?</h5>When a model has too much flexibility (too many parameters, or too complex a function) relative to the amount and noisiness of the training data, it has room to fit the noise as if it were signal.</div>
+        <div class="fail-item"><h5>Assumptions it quietly makes</h5>Evaluating a model on the same data it trained on quietly assumes training performance predicts real‑world performance — it doesn't.</div>
+        <div class="fail-item"><h5>What happens if training data is poor?</h5>Even a well‑designed model can't generalize past bad, biased, or mislabeled training data — "garbage in, garbage out" applies before overfitting even becomes relevant.</div>
+        <div class="fail-item"><h5>What happens if the data distribution changes?</h5>Even a model that generalized perfectly on last year's data can degrade when the real world shifts (new spam wording, new customer behavior) — this is called <strong>data drift</strong>, and it isn't the same failure as overfitting, though it looks similar from the outside (declining accuracy).</div>
+      </div>
+      <p style="margin-top:12px;"><strong>What replaces it when it breaks:</strong> Regularization (penalizing excessive model complexity), gathering more/cleaner training data, simplifying the model, or using cross‑validation to catch overfitting before deployment.</p>
+    </div>
+
+    <div class="panel" data-panel="terms" data-concept="generalization">
+      <h4>Important terminology introduced here</h4>
+      <div class="termchips">
+        <span class="termchip">Generalization</span><span class="termchip">Overfitting</span><span class="termchip">Underfitting</span><span class="termchip">Training error</span><span class="termchip">Test error</span><span class="termchip">Regularization</span><span class="termchip">Data drift</span>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="compress" data-concept="generalization">
+      <h4>Compress It</h4>
+      <div class="predict-box"><label for="compress6">Explain overfitting to a 12‑year‑old:</label><textarea id="compress6"></textarea></div>
+      <div class="compress-flow">
+        <div class="cf-item"><h5>Expert compression</h5>Overfitting = memorizing the training set's noise instead of learning its signal; underfitting = the model is too weak to even capture the signal.</div>
+        <div class="cf-item"><h5>One‑diagram version</h5>Too simple (underfit) ← Good fit → Too wiggly (overfit)</div>
+        <div class="cf-item"><h5>One‑sentence version</h5><span class="onesentence">"A model should learn the pattern, not memorize the homework."</span></div>
+      </div>
+      <p style="margin-top:12px;"><strong>Deep mastery strategy:</strong> Nearly every advanced ML technique — regularization, cross‑validation, dropout, early stopping — exists to manage this one tension between fitting the data and generalizing beyond it. Understand this trade‑off deeply, and dozens of "why does X technique exist" questions answer themselves.</p>
+    </div>
+
+    <div class="panel" data-panel="stakes" data-concept="generalization">
+      <h4>Engineer Stakes</h4>
+      <div class="stakes-box">A medical‑diagnosis model reports 99% accuracy in the lab, using data from one hospital. Deployed at a different hospital with different equipment and patient demographics, its accuracy drops to 74%, and doctors start distrusting it entirely. Walk through what could be responsible — overfitting, underfitting, or something else.</div>
+      <div class="challenge-box"><strong>Build in Public Challenge:</strong> Take any prediction you've made informally (guessing a movie you'll like, predicting a friend's reaction). Write down one way your own "model" of that person might be overfit to a small, unrepresentative sample of past interactions.</div>
+    </div>
+
+    <div class="panel" data-panel="judgment" data-concept="generalization">
+      <h4>AI vs. Human Judgment</h4>
+      <div class="judg-grid">
+        <div class="judg-item"><h5>AI Should Handle</h5><ul><li>Generating code that automatically splits data into training/validation/test sets</li><li>Suggesting standard regularization techniques to try first</li></ul></div>
+        <div class="judg-item"><h5>HUMANS Must Own</h5><ul><li>Deciding whether the test set is actually representative of real deployment conditions</li><li>Judging whether an accuracy drop after deployment is overfitting, data drift, or a data pipeline bug</li></ul></div>
+      </div>
+      <div class="ask-ai">💬 What would you ask AI? — "My model gets 99% training accuracy and 81% test accuracy — what are the most likely causes and fixes?" <br>✅ What must you verify yourself? — Whether your test set was built correctly in the first place (no leakage of training data into it), since that invalidates the whole diagnosis.</div>
+    </div>
+
+    <div class="panel" data-panel="quick" data-concept="generalization">
+      <h4>Interview Question</h4>
+      <div class="interview-mini"><div class="role">Advanced</div><p><strong>Q:</strong> Your model has 98% training accuracy and 70% test accuracy. Diagnose the problem and propose two fixes.</p><p><strong>Strong answer:</strong> This gap is the classic signature of overfitting — the model has memorized training‑set specifics rather than learning generalizable patterns. Fixes: (1) simplify the model or add regularization to constrain its flexibility, (2) gather more/varied training data so noise‑fitting is a smaller share of what's learned; also verify the split itself has no data leakage.</p></div>
+      <h4 style="margin-top:18px;">Quick Check</h4>
+      <div class="quickcheck">
+        <div class="qc-item"><p>A model that performs poorly on both training and test data most likely suffers from:</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">Overfitting</button>
+            <button class="qc-opt" data-correct="true">Underfitting</button>
+            <button class="qc-opt" data-correct="false">Perfect generalization</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+        <div class="qc-item"><p>The best way to estimate how a model will perform on truly new data is to:</p>
+          <div class="qc-opts">
+            <button class="qc-opt" data-correct="false">Check its accuracy on the training set</button>
+            <button class="qc-opt" data-correct="true">Evaluate it on a held-out test set it never trained on</button>
+            <button class="qc-opt" data-correct="false">Ask the model how confident it is</button>
+          </div>
+          <div class="qc-feedback"></div>
+        </div>
+      </div>
+      <h4 style="margin-top:18px;">Key Takeaways</h4>
+      <ul class="keytakeaways">
+        <li>Generalization = performance on new, unseen data — the actual goal of ML.</li>
+        <li>Overfitting: too closely fits training noise; underfitting: too simple to fit the real pattern.</li>
+        <li>Always evaluate on a held-out test set, never on training data alone.</li>
+        <li>Data drift is a separate failure mode from overfitting, even though both look like "accuracy dropped."</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DATA QUALITY ============ -->
+<section class="page" id="data-quality">
+  <div class="page-kicker">The Core Struggle · Supporting concept</div>
+  <h2>Data quality &amp; representation</h2>
+  <p class="page-intro">A perfect algorithm trained on bad data still produces a bad model. This idea is boring to state and easy to forget in practice — which is exactly why it causes so many real failures.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.85rem;color:var(--teal-deep);">🎬 Story</h4>
+      <p>Priya's labeled emails were mostly collected during a holiday sale, when "50% off" appeared constantly in <em>legitimate</em> marketing emails. The model learned that discount language leans toward "not spam." Months later, outside sale season, real scam emails using discount language sail through undetected — because the training data wasn't representative of the full range of situations the model would face.</p>
+    </div>
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.85rem;color:var(--teal-deep);">🔴 How this breaks</h4>
+      <p><strong>Sampling bias:</strong> training data collected in a way that doesn't reflect real deployment conditions (e.g., only one season, one region, one customer segment).</p>
+      <p style="margin-bottom:0;"><strong>Poor-quality data:</strong> mislabeled examples, missing values, and irrelevant features add noise the model may mistake for signal — see overfitting above.</p>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.85rem;color:var(--teal-deep);">🟢 Compress it</h4>
+      <p class="onesentence" style="margin-top:0;">"A model can only be as fair and accurate as the data it was shown."</p>
+    </div>
+    <div class="card">
+      <h4 style="font-family:var(--font-mono);font-size:.85rem;color:var(--teal-deep);">🟡 Engineer stakes</h4>
+      <p style="margin-bottom:0;">A resume‑screening model trained mostly on historically hired candidates can quietly learn and perpetuate old hiring biases — with nothing in the code "explicitly" being biased. Whose responsibility is it to catch this before deployment?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISUAL RECAP ============ -->
+<section class="page" id="visual-recap">
+  <div class="page-kicker">Study systems</div>
+  <h2>Visual recap: the whole chapter in one workflow</h2>
+  <p class="page-intro">Every ML project — whatever type of learning it uses — moves through the same broad workflow. Use this as your mental map when you meet a new ML system.</p>
+  <div class="diagram-card">
+    <svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="wftitle">
+      <title id="wftitle">Workflow: collect data, choose a model, train, evaluate on a test set, then deploy and monitor for drift, looping back to collect more data</title>
+      <defs><marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0E6E62"/></marker></defs>
+      <g font-family="IBM Plex Mono" font-size="10.5" text-anchor="middle">
+        <rect x="10" y="50" width="110" height="50" rx="8" fill="#E9F0FE" stroke="#2F6FED"/><text x="65" y="80">Collect data</text>
+        <line x1="120" y1="75" x2="150" y2="75" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow3)"/>
+        <rect x="150" y="50" width="110" height="50" rx="8" fill="#F0EAFB" stroke="#7B4FE0"/><text x="205" y="80">Choose model type</text>
+        <line x1="260" y1="75" x2="290" y2="75" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow3)"/>
+        <rect x="290" y="50" width="90" height="50" rx="8" fill="#E7F5EC" stroke="#2F9E67"/><text x="335" y="80">Train</text>
+        <line x1="380" y1="75" x2="410" y2="75" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow3)"/>
+        <rect x="410" y="50" width="110" height="50" rx="8" fill="#FBF0DC" stroke="#C67D02"/><text x="465" y="75">Evaluate on</text><text x="465" y="88">test set</text>
+        <line x1="520" y1="75" x2="550" y2="75" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow3)"/>
+        <rect x="550" y="50" width="90" height="50" rx="8" fill="#FBEAE8" stroke="#C1443C"/><text x="595" y="80">Deploy</text>
+        <line x1="640" y1="75" x2="670" y2="75" stroke="#0E6E62" stroke-width="2" marker-end="url(#arrow3)"/>
+        <rect x="670" y="50" width="80" height="50" rx="8" fill="#EDEBF9" stroke="#7B4FE0"/><text x="710" y="75">Monitor</text><text x="710" y="88">for drift</text>
+        <path d="M710,100 C710,130 65,130 65,100" fill="none" stroke="#0E6E62" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arrow3)"/>
+        <text x="390" y="140" font-family="IBM Plex Mono" font-size="9" fill="#4A5568">the loop back = new data collected during monitoring feeds the next retraining cycle</text>
+      </g>
+    </svg>
+  </div>
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="card"><h4 style="font-family:var(--font-mono);font-size:.8rem;color:var(--teal-deep);">Sorting axis 1</h4>How much supervision? Supervised → Semisupervised → Unsupervised → Reinforcement</div>
+    <div class="card"><h4 style="font-family:var(--font-mono);font-size:.8rem;color:var(--teal-deep);">Sorting axis 2</h4>When does it learn? Batch (periodic retrain) vs. Online (continuous update)</div>
+    <div class="card"><h4 style="font-family:var(--font-mono);font-size:.8rem;color:var(--teal-deep);">Sorting axis 3</h4>How does it generalize? Instance-based (compare to stored examples) vs. Model-based (fitted function)</div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="page" id="glossary">
+  <div class="page-kicker">Study systems</div>
+  <h2>Searchable glossary</h2>
+  <p class="page-intro">Type to filter. Every term below maps back to Priya's inbox story wherever possible.</p>
+  <input type="text" class="glossary-search" id="glossarySearch" placeholder="Search terms — try 'overfitting' or 'label'..." aria-label="Search glossary">
+  <div class="glossary-grid" id="glossaryGrid"></div>
+</section>
+
+<!-- ============ EXERCISES ============ -->
+<section class="page" id="exercises">
+  <div class="page-kicker">Study systems</div>
+  <h2>Exercises</h2>
+  <p class="page-intro">Mixed difficulty. Try to answer before revealing — that's the whole point of Law 1.</p>
+  <div class="filter-bar" id="exerciseFilters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="beginner">Beginner</button>
+    <button class="filter-btn" data-filter="intermediate">Intermediate</button>
+    <button class="filter-btn" data-filter="advanced">Advanced</button>
+  </div>
+  <div id="exerciseList"></div>
+</section>
+
+<!-- ============ INTERVIEW PREP ============ -->
+<section class="page" id="interview">
+  <div class="page-kicker">Study systems</div>
+  <h2>Machine Learning Interview Preparation — Chapter 1</h2>
+  <p class="page-intro">Beginner, Intermediate, Advanced, and Scenario‑based questions. Each one includes a strong answer, a deeper dive, and what a follow‑up question might look like.</p>
+  <div class="filter-bar" id="iqFilters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="Beginner">Beginner</button>
+    <button class="filter-btn" data-filter="Intermediate">Intermediate</button>
+    <button class="filter-btn" data-filter="Advanced">Advanced</button>
+    <button class="filter-btn" data-filter="Scenario">Scenario</button>
+  </div>
+  <div id="iqList"></div>
+</section>
+
+<!-- ============ FLASHCARDS ============ -->
+<section class="page" id="flashcards">
+  <div class="page-kicker">Study systems</div>
+  <h2>Interview flashcards</h2>
+  <p class="page-intro">Click the card to flip it. Use "Shuffle" to test yourself out of order.</p>
+  <div class="flashwrap">
+    <div class="flashcard" id="flashcard" tabindex="0" role="button" aria-label="Flip flashcard">
+      <div class="flashcard-inner">
+        <div class="flashface front" id="flashFront">Loading…</div>
+        <div class="flashface back" id="flashBack">Loading…</div>
+      </div>
+    </div>
+    <div class="flashnav">
+      <button id="flashPrev">← Prev</button>
+      <span class="count" id="flashCount">1 / 1</span>
+      <button id="flashNext">Next →</button>
+      <button id="flashShuffle">🔀 Shuffle</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INTERVIEW TRAPS ============ -->
+<section class="page" id="traps">
+  <div class="page-kicker">Study systems</div>
+  <h2>Interview traps</h2>
+  <p class="page-intro">These are answers that sound reasonable but reveal shaky understanding — and how to upgrade them.</p>
+  <div id="trapList"></div>
+</section>
+
+<!-- ============ CHEAT SHEET ============ -->
+<section class="page" id="cheatsheet">
+  <div class="page-kicker">Study systems</div>
+  <h2>Interview cheat sheet</h2>
+  <div class="cheat-grid">
+    <div class="cheat-card card">
+      <h4>Top concepts</h4>
+      <ul>
+        <li>ML = learning rules from data instead of hand-writing them</li>
+        <li>Supervised / Unsupervised / Semisupervised / Reinforcement</li>
+        <li>Batch vs. Online learning</li>
+        <li>Instance-based vs. Model-based learning</li>
+        <li>Generalization, overfitting, underfitting</li>
+      </ul>
+    </div>
+    <div class="cheat-card card">
+      <h4>Top definitions</h4>
+      <ul>
+        <li><strong>Feature:</strong> an input variable describing an example</li>
+        <li><strong>Label:</strong> the correct answer attached to a training example</li>
+        <li><strong>Generalization:</strong> performance on new, unseen data</li>
+        <li><strong>Hyperparameter:</strong> a setting chosen before training, not learned from data</li>
+      </ul>
+    </div>
+    <div class="cheat-card card">
+      <h4>Top comparisons</h4>
+      <ul>
+        <li>Traditional programming (rules in) vs. ML (rules out)</li>
+        <li>Overfitting (too flexible) vs. underfitting (too rigid)</li>
+        <li>Batch (periodic) vs. online (continuous) training</li>
+        <li>Parameters (learned) vs. hyperparameters (chosen)</li>
+      </ul>
+    </div>
+    <div class="cheat-card card">
+      <h4>What interviewers are actually testing</h4>
+      <ul>
+        <li>Can you explain a concept without jargon, to check real understanding?</li>
+        <li>Do you know when NOT to use ML?</li>
+        <li>Can you diagnose a train/test accuracy gap on the spot?</li>
+        <li>Do you treat data quality as seriously as model choice?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL MODEL ============ -->
+<section class="page" id="final-model">
+  <div class="page-kicker">Closing</div>
+  <h2>Your final mental model</h2>
+  <div class="story-box">
+    <p>Priya's inbox never stopped changing, and neither did Marcus's system. He didn't build a spam filter once — he built a <em>process</em>: collect labeled data, choose an appropriate type of model, train it, test it honestly on data it hasn't seen, deploy it, and keep watching for the moment the world shifts under it.</p>
+    <p>Every term in this chapter is a piece of vocabulary for reasoning about that process precisely: what kind of supervision the data provides, when the model updates, how it generalizes, and how you'll know when it's quietly failing.</p>
+  </div>
+  <div class="card" style="margin-top:20px;">
+    <h4 style="font-family:var(--font-mono);font-size:.85rem;color:var(--teal-deep);">Chapter summary</h4>
+    <ul class="keytakeaways">
+      <li>Machine Learning replaces hand-written rules with rules learned from labeled examples.</li>
+      <li>Use ML when a task's rules are too complex, numerous, or unstable to hand-code — not by default.</li>
+      <li>Sort any ML system along three axes: supervision level, learning schedule, and generalization strategy.</li>
+      <li>The central risk in ML is failing to generalize — overfitting and underfitting are the two ways that happens.</li>
+      <li>Data quality and representativeness bound how good any model can ever be, regardless of algorithm choice.</li>
+      <li>AI tools can accelerate the mechanics of ML work, but a human must still own the judgment calls.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer class="sitefoot">Original teaching content inspired by the concepts of Chapter 1, <em>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</em>, 3rd Edition. All explanations, stories, and examples on this page are independently written.</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ TAB STACKS ============ */
+  document.querySelectorAll('.tabstack').forEach(function(stack){
+    var concept = stack.getAttribute('data-concept');
+    var buttons = stack.querySelectorAll('.tabbtn');
+    var panels = document.querySelectorAll('.panel[data-concept="'+concept+'"]');
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var target = btn.getAttribute('data-panel');
+        buttons.forEach(function(b){ b.classList.toggle('active', b===btn); });
+        panels.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-panel')===target); });
+      });
+    });
+  });
+
+  /* ============ REVEAL BUTTONS (Law 1: Prediction) ============ */
+  document.querySelectorAll('.reveal-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.getAttribute('data-reveal');
+      var box = document.getElementById(id);
+      if(!box) return;
+      var open = box.classList.toggle('open');
+      btn.textContent = open ? 'Hide the correction' : 'Reveal the correction';
+    });
+  });
+
+  /* ============ QUICK CHECK BUTTONS ============ */
+  document.querySelectorAll('.qc-item').forEach(function(item){
+    var opts = item.querySelectorAll('.qc-opt');
+    var feedback = item.querySelector('.qc-feedback');
+    opts.forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var correct = opt.getAttribute('data-correct') === 'true';
+        opts.forEach(function(o){ o.disabled = true; });
+        opt.classList.add(correct ? 'correct' : 'incorrect');
+        if(!correct){
+          opts.forEach(function(o){ if(o.getAttribute('data-correct')==='true') o.classList.add('correct'); });
+        }
+        feedback.textContent = correct ? '✅ Correct — nice work.' : '❌ Not quite — the correct answer is highlighted above.';
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  /* ============ READING MODE SWITCH ============ */
+  document.querySelectorAll('.mode-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var mode = btn.getAttribute('data-mode');
+      document.body.className = 'mode-' + mode;
+      document.querySelectorAll('.mode-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+    });
+  });
+
+  /* ============ TOC ACTIVE HIGHLIGHT + PROGRESS BAR ============ */
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+  var progressFill = document.getElementById('progressFill');
+  var progressPct = document.getElementById('progressPct');
+
+  function onScroll(){
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop/docHeight)*100)) : 0;
+    if(progressFill) progressFill.style.width = pct + '%';
+    if(progressPct) progressPct.textContent = pct + '%';
+
+    var current = sections[0];
+    for(var i=0;i<sections.length;i++){
+      var rect = sections[i].getBoundingClientRect();
+      if(rect.top <= 140){ current = sections[i]; }
+    }
+    tocLinks.forEach(function(a){
+      a.classList.toggle('active', current && a.getAttribute('href') === '#'+current.id);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ============ DATA: GLOSSARY ============ */
+  var glossary = [
+    {term:"Feature", beginner:"A piece of information about an example, like the ingredients of a data point.", technical:"An input variable used to describe an example, often one column in a dataset.", story:"Whether an email contains a link, how many exclamation points it has, whether the sender is known — each is a feature.", usage:"Feature choice usually matters more than algorithm choice for real-world performance.", related:"Label, Example, Dataset", misconception:"Beginners think more features are always better — irrelevant features can add noise and cause overfitting.", interview:"Be ready to explain feature selection and why it matters.", failure:"Using a feature that leaks the label (e.g., a field only filled in after an email was marked spam) inflates accuracy falsely.", memory:"Feature = a fact about the example."},
+    {term:"Label", beginner:"The correct answer attached to a training example.", technical:"The target value a supervised model is trained to predict.", story:"Priya's 'spam' or 'not spam' tag on each email is the label.", usage:"Labels define what 'supervised' means — no labels, no supervision.", related:"Feature, Supervised learning", misconception:"Labels are assumed to be 100% correct — in reality human-assigned labels often contain errors.", interview:"Can you explain how label noise affects model quality?", failure:"Inconsistent labeling (the same kind of email tagged differently by different people) directly limits how accurate any model can become.", memory:"Label = the answer key entry."},
+    {term:"Training data", beginner:"The examples a model learns from.", technical:"The subset of data used to fit model parameters during training.", story:"Priya's 10,000 already-tagged emails.", usage:"Should represent the full range of situations the model will face in deployment.", related:"Test data, Sampling bias", misconception:"Bigger training data always fixes problems — it doesn't fix bias or mislabeling.", interview:"How would you detect if training data isn't representative?", failure:"Training only on last month's emails misses seasonal patterns entirely.", memory:"Training data = the practice set."},
+    {term:"Test data", beginner:"New examples used to check how well the model really learned, that it never trained on.", technical:"A held-out dataset used to estimate generalization error.", story:"Emails that arrived after Marcus finished training — used only to check performance.", usage:"Should never be used during training or hyperparameter tuning to avoid leakage.", related:"Generalization, Overfitting", misconception:"Some assume checking accuracy on training data is enough — it dramatically overstates real performance.", interview:"Why can't you evaluate a model using its own training data?", failure:"'Peeking' at test data during development quietly inflates reported performance.", memory:"Test data = the real exam."},
+    {term:"Model", beginner:"The thing that makes predictions, after learning from examples.", technical:"A mathematical function with parameters, fit to data, used to make predictions on new inputs.", story:"The formula or comparison system Marcus builds to score new emails.", usage:"Model choice affects speed, interpretability, and how well it captures complex patterns.", related:"Parameters, Algorithm", misconception:"'Model' and 'algorithm' are often used interchangeably but aren't the same — the algorithm is the training procedure, the model is its output.", interview:"Can you distinguish 'algorithm' from 'model'?", failure:"Deploying a model without version tracking makes it impossible to know exactly what's running in production.", memory:"Model = the trained result."},
+    {term:"Algorithm", beginner:"The recipe used to build the model from data.", technical:"The procedure that searches for model parameters that minimize error on training data.", story:"The specific method Marcus chooses (e.g., nearest neighbors, or fitting a line) to go from emails to a working spam-scorer.", usage:"Different algorithms suit different data sizes, shapes, and interpretability needs.", related:"Model, Hyperparameter", misconception:"People conflate 'algorithm' with 'model' — the algorithm produces the model, they're not the same object.", interview:"Name an algorithm and the type of model it produces.", failure:"Choosing an algorithm mismatched to data size (e.g., a slow method on millions of rows) causes practical failures, not accuracy failures.", memory:"Algorithm = the recipe; Model = the finished dish."},
+    {term:"Parameters", beginner:"The internal numbers a model adjusts while learning.", technical:"Values learned from data during training that define the model's behavior (e.g., weights in a linear model).", story:"The 'importance scores' the spam model assigns to things like 'contains a link.'", usage:"More parameters usually mean more flexibility — and more overfitting risk.", related:"Hyperparameter, Overfitting", misconception:"Confused with hyperparameters — parameters are learned, hyperparameters are chosen.", interview:"Contrast parameters and hyperparameters with an example.", failure:"Too many parameters relative to data size is a classic overfitting cause.", memory:"Parameters = learned; Hyperparameters = chosen."},
+    {term:"Hyperparameter", beginner:"A setting you choose before training starts, not something the model learns.", technical:"A configuration value set prior to training that controls the learning process itself (e.g., how flexible the model is allowed to be).", story:"Marcus deciding in advance 'the model can use at most 10 features' — he sets that, the model doesn't learn it.", usage:"Tuned using a validation set, never the final test set.", related:"Parameters, Overfitting", misconception:"People assume hyperparameters are minor details — they can be the difference between underfitting and overfitting.", interview:"How do you choose hyperparameters without contaminating your test set?", failure:"Tuning hyperparameters directly against the test set silently invalidates your performance estimate.", memory:"Hyper = 'above' — set above/before training."},
+    {term:"Generalization", beginner:"How well a model does on new stuff it hasn't seen before.", technical:"The model's performance on data drawn from the same distribution as training data but not seen during training.", story:"Whether Marcus's model correctly filters tomorrow's brand-new emails, not just yesterday's.", usage:"The actual goal of every ML project — training accuracy is just a proxy.", related:"Overfitting, Test data", misconception:"Confused with training accuracy — they can move in opposite directions.", interview:"Why is generalization the true measure of ML success?", failure:"Optimizing purely for training accuracy actively harms generalization past a point.", memory:"Generalization = does it work on the new stuff?"},
+    {term:"Overfitting", beginner:"When a model memorizes the training examples too closely, including their random noise.", technical:"A state where a model's flexibility lets it fit training-set-specific noise, producing low training error but high generalization error.", story:"Marcus's model scoring 99.8% on training emails but only 81% on new ones.", usage:"Managed via regularization, more/better data, or simpler models.", related:"Underfitting, Regularization", misconception:"High training accuracy is not automatically good news.", interview:"How would you detect and fix overfitting?", failure:"Silent — no error message, just a big train/test performance gap.", memory:"Overfitting = memorized the homework, not the subject."},
+    {term:"Underfitting", beginner:"When a model is too simple to even learn the pattern properly.", technical:"A state where a model lacks the flexibility to capture the true underlying pattern, producing high error on both training and test data.", story:"A spam model that only checks email length and misses almost everything else.", usage:"Fixed by using a more flexible model or better features.", related:"Overfitting, Generalization", misconception:"Assumed to be 'safer' than overfitting — it's just a different failure, not a safer default.", interview:"How do you distinguish underfitting from overfitting from the numbers alone?", failure:"Poor performance everywhere, often mistaken for a data problem when it's actually a model-capacity problem.", memory:"Underfitting = too weak to see the pattern."},
+    {term:"Supervised learning", beginner:"Learning from examples that already have the correct answer attached.", technical:"A training paradigm where every training example includes an input and a target label.", story:"Marcus's original spam model, trained on emails Priya already tagged.", usage:"The most common and best-understood ML paradigm when labeled data is available.", related:"Unsupervised learning, Label", misconception:"Assumed to always need huge labeled datasets — sometimes a modest labeled set is enough.", interview:"Give an example of a supervised learning problem outside of spam filtering.", failure:"Bad or inconsistent labels directly cap the quality achievable.", memory:"Supervised = has the answer key."},
+    {term:"Unsupervised learning", beginner:"Finding patterns in data that has no correct-answer labels at all.", technical:"A training paradigm that discovers structure (e.g., clusters) in unlabeled data.", story:"Grouping customer emails by topic without anyone tagging the topics in advance.", usage:"Useful for exploration, anomaly detection, and compressing data before further analysis.", related:"Clustering, Supervised learning", misconception:"Assumed to need no human judgment — interpreting the output still requires a person.", interview:"How would you evaluate an unsupervised model without ground-truth labels?", failure:"Producing statistically real but practically meaningless groupings.", memory:"Unsupervised = no answer key, find structure yourself."},
+    {term:"Semisupervised learning", beginner:"Learning from a little labeled data plus a lot of unlabeled data, together.", technical:"A training paradigm that leverages a small labeled subset alongside a larger unlabeled dataset.", story:"Priya labels 500 of 50,000 emails; Marcus's model uses both sets together.", usage:"Common when labeling is expensive but raw data is abundant.", related:"Supervised, Unsupervised", misconception:"Assumed to always outperform pure supervised learning — it depends heavily on data quality.", interview:"When would you reach for semisupervised learning?", failure:"If the unlabeled data doesn't relate meaningfully to the labeled task, it can hurt more than help.", memory:"Semisupervised = a little answer key, a lot of extra data."},
+    {term:"Reinforcement learning", beginner:"Learning by trying actions and getting rewards or penalties over time, not by being shown correct answers directly.", technical:"A paradigm where an agent learns a policy that maximizes cumulative reward through interaction with an environment.", story:"A support chatbot that adjusts its strategy based on customer satisfaction scores after conversations, not per-message labels.", usage:"Common in games, robotics, and sequential decision-making.", related:"Reward signal, Policy", misconception:"Confused with supervised learning — there's no per-step 'correct answer,' only delayed feedback.", interview:"How does reinforcement learning differ from supervised learning?", failure:"A poorly designed reward signal can be 'gamed' by the agent in unintended ways.", memory:"Reinforcement = learn from consequences, not answer keys."},
+    {term:"Batch learning", beginner:"Training the model all at once on a big pile of data, then using it unchanged until the next retrain.", technical:"A training approach where the model is fit on the entire available dataset at once and then frozen until the next full retraining cycle.", story:"Marcus retraining his spam model from scratch once a month.", usage:"Simpler to reason about and reproduce than online learning.", related:"Online learning", misconception:"'Online' refers to internet deployment — it actually refers to the training schedule.", interview:"What are the operational costs of frequent batch retraining?", failure:"Slow to adapt to fast-changing patterns between retraining cycles.", memory:"Batch = big meal, then nothing until next mealtime."},
+    {term:"Online learning", beginner:"Training the model a little bit at a time, continuously, as new data arrives.", technical:"A training approach where the model updates incrementally on a stream of data rather than being retrained from scratch.", story:"Marcus's later spam model, updated with every new labeled email.", usage:"Well-suited to fast-changing environments or very large streaming datasets.", related:"Batch learning, Data drift", misconception:"Assumed to always be superior — it's also more vulnerable to bad or adversarial data.", interview:"What monitoring would you add to an online-learning system?", failure:"Gradual silent degradation ('model poisoning') from a stream of bad examples.", memory:"Online = grazing continuously, not eating one big meal."},
+    {term:"Instance-based learning", beginner:"Making predictions by comparing a new example to stored examples from before.", technical:"A learning approach that generalizes by measuring similarity between a new instance and stored training instances (e.g., k-nearest neighbors).", story:"Marcus finding the most similar past emails to a new one and copying their majority label.", usage:"Simple, needs no assumption about the pattern's shape, but can be slow at large scale.", related:"Model-based learning", misconception:"Assumed to be 'just memorization' — it does generalize, via similarity, just differently than model-based methods.", interview:"What's a downside of instance-based learning as data grows very large?", failure:"Prediction time and memory usage both grow with the size of the stored dataset.", memory:"Instance-based = 'who does this look like?'"},
+    {term:"Model-based learning", beginner:"Fitting a general formula to the data, then using just that formula to predict.", technical:"A learning approach that fits a parametric function to training data, allowing prediction without retaining the original examples.", story:"Marcus fitting a scoring formula and discarding the original 10,000 emails afterward.", usage:"Prediction is fast and memory-efficient once trained.", related:"Instance-based learning, Parameters", misconception:"Assumed to always outperform instance-based learning — depends on whether the chosen function shape actually matches reality.", interview:"What happens if the chosen model family is too simple for the real pattern?", failure:"Underfitting, if the function shape (e.g., a straight line) can't capture the true relationship.", memory:"Model-based = compress data into a formula."},
+    {term:"Data drift", beginner:"When the real world changes so much that old patterns stop applying.", technical:"A shift in the underlying data distribution between training time and deployment time, degrading model performance without any code change.", story:"Spam wording evolving after Marcus's model was trained, so the old patterns stop matching.", usage:"Requires ongoing monitoring, not just a one-time training/testing process.", related:"Online learning, Generalization", misconception:"Confused with overfitting — drift is about the world changing, not about the model being too complex.", interview:"How would you detect data drift in production?", failure:"Performance decline that looks identical to other failure modes from the outside, requiring investigation to diagnose correctly.", memory:"Drift = the ground moved under the model."},
+    {term:"Regularization", beginner:"A way of telling a model 'don't get too fancy' so it doesn't memorize noise.", technical:"A technique that constrains model complexity (e.g., penalizing large parameter values) to reduce overfitting.", story:"Marcus limiting how much weight any single feature (like one specific word) is allowed to carry in the scoring formula.", usage:"A primary tool for managing the overfitting/underfitting trade-off.", related:"Overfitting, Hyperparameter", misconception:"Assumed to always help — too much regularization causes underfitting instead.", interview:"How does regularization affect the bias/variance trade-off?", failure:"Over-regularizing swings the problem from overfitting to underfitting.", memory:"Regularization = a leash on model flexibility."}
+  ];
+
+  function renderGlossary(filterText){
+    var grid = document.getElementById('glossaryGrid');
+    if(!grid) return;
+    var q = (filterText||'').toLowerCase().trim();
+    grid.innerHTML = '';
+    glossary.filter(function(g){
+      if(!q) return true;
+      return (g.term+g.beginner+g.technical).toLowerCase().indexOf(q) !== -1;
+    }).forEach(function(g){
+      var el = document.createElement('details');
+      el.className = 'gterm';
+      el.innerHTML = '<summary>'+g.term+'</summary><div class="gbody"><dl>'+
+        '<dt>Beginner definition</dt><dd>'+g.beginner+'</dd>'+
+        '<dt>Technical definition</dt><dd>'+g.technical+'</dd>'+
+        '<dt>Story example</dt><dd>'+g.story+'</dd>'+
+        '<dt>Real-world usage</dt><dd>'+g.usage+'</dd>'+
+        '<dt>Related terms</dt><dd>'+g.related+'</dd>'+
+        '<dt>Common misconception</dt><dd>'+g.misconception+'</dd>'+
+        '<dt>Interview relevance</dt><dd>'+g.interview+'</dd>'+
+        '<dt>Failure mode</dt><dd>'+g.failure+'</dd>'+
+        '<dt>Memory trick</dt><dd>'+g.memory+'</dd>'+
+        '</dl></div>';
+      grid.appendChild(el);
+    });
+    if(!grid.children.length){
+      grid.innerHTML = '<p style="color:var(--ink-soft);">No terms match "'+filterText+'". Try another word.</p>';
+    }
+  }
+  renderGlossary('');
+  var gsearch = document.getElementById('glossarySearch');
+  if(gsearch){ gsearch.addEventListener('input', function(){ renderGlossary(gsearch.value); }); }
+
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+
+  /* ============ DATA: EXERCISES ============ */
+  var exercises = [
+    {difficulty:"beginner", skill:"Definitions", type:"Multiple choice", question:"Which best describes what a 'label' is in supervised learning?", answer:"The correct answer attached to a training example.", explanation:"Labels are what make learning 'supervised' — they give the model something to check its guesses against during training.", reasoning:"Without labels, there is no target for the model to learn to predict; the training process has nothing to compare its output to.", commonWrong:"'A category of algorithm.'", whyTempting:"Learners often confuse the word 'label' with model type because both involve categorization language."},
+    {difficulty:"beginner", skill:"Explain-to-a-child", type:"Short answer", question:"Explain, in one sentence a 10-year-old would understand, why a spam filter needs examples instead of just rules.", answer:"Because spam keeps changing its wording, so a computer that learns from lots of examples can notice new tricks a person might miss or forget to write a rule for.", explanation:"This tests genuine compression, not memorized vocabulary.", reasoning:"The core reason ML beats hand-written rules here is the sheer, shifting variety of spam patterns.", commonWrong:"'Because computers are smarter than rules.'", whyTempting:"It sounds intuitively true but doesn't actually explain the mechanism — it's a restatement, not an explanation."},
+    {difficulty:"beginner", skill:"True/false", type:"True/false", question:"True or False: A model with 99% training accuracy is guaranteed to perform well on new data.", answer:"False.", explanation:"High training accuracy can indicate overfitting — the model may have memorized training-specific noise rather than learning a generalizable pattern.", reasoning:"Only test-set performance estimates real-world behavior reliably.", commonWrong:"'True'", whyTempting:"High accuracy numbers intuitively feel like unambiguous good news."},
+    {difficulty:"beginner", skill:"Concept comparison", type:"Short answer", question:"What's the key difference between a 'feature' and a 'label'?", answer:"A feature is an input describing the example; a label is the correct output/answer for that example.", explanation:"Features go in, labels are what the model is trying to predict.", reasoning:"This distinction underlies the entire structure of a supervised dataset.", commonWrong:"'They're basically the same thing.'", whyTempting:"Both are 'columns' in a dataset, which blurs the distinction for beginners."},
+    {difficulty:"intermediate", skill:"Choose the correct approach", type:"Scenario analysis", question:"You have 2 million unlabeled product images and 200 labeled ones. Which learning paradigm fits best, and why?", answer:"Semisupervised learning.", explanation:"It lets you exploit the huge unlabeled dataset's structure while still anchoring learning with the (small but real) labeled signal.", reasoning:"Pure supervised learning on 200 examples would likely underfit or overfit badly; pure unsupervised learning ignores useful label information entirely.", commonWrong:"'Just use supervised learning on the 200 labeled images.'", whyTempting:"It's the simplest, most familiar option, but wastes the much larger unlabeled dataset."},
+    {difficulty:"intermediate", skill:"Debugging", type:"Debugging exercise", question:"A model shows 96% training accuracy and 60% test accuracy. Name two plausible causes and one way to distinguish between them.", answer:"Overfitting, or a flawed/leaky test split. Distinguish by checking whether the split was done correctly (no train/test overlap or leakage) before assuming it's purely an overfitting problem.", explanation:"A large train/test gap has more than one possible root cause, and jumping straight to 'overfitting' without checking the split is a common mistake.", reasoning:"Data pipeline bugs are a very common, under-suspected cause of exactly this symptom.", commonWrong:"'It must be overfitting, add regularization.'", whyTempting:"Overfitting is the textbook explanation for this exact symptom, so it's the first thing that comes to mind."},
+    {difficulty:"intermediate", skill:"Failure analysis", type:"Failure-analysis exercise", question:"An online-learning recommendation model's quality degrades slowly over two weeks with no errors logged. What's the most likely category of problem, and what would you check first?", answer:"Data drift or a slow data-quality issue (e.g., a broken upstream field feeding bad signals). Check the distribution of recent input data against a known-good baseline first.", explanation:"Online learners fail silently because there's no single retraining event to sanity-check — problems creep in gradually.", reasoning:"Comparing recent data distributions to a baseline is the fastest way to catch drift or pipeline issues before diagnosing the model itself.", commonWrong:"'The algorithm must be wrong, replace it.'", whyTempting:"When performance drops, it's tempting to blame the model rather than the data feeding it."},
+    {difficulty:"intermediate", skill:"Concept comparison", type:"Concept comparison", question:"Compare batch learning and online learning in terms of how each handles a sudden, sharp change in data patterns.", answer:"Batch learning won't reflect the change until the next scheduled retrain, potentially missing it for days or weeks. Online learning adapts continuously but can also latch onto a temporary anomaly too quickly if not guarded against.", explanation:"Neither is strictly 'better' — they trade off responsiveness against stability.", reasoning:"The right choice depends on how fast the domain changes and how costly a wrong quick adaptation would be.", commonWrong:"'Online learning is always better because it's more up to date.'", whyTempting:"Continuous updating sounds strictly superior, ignoring the stability risk it introduces."},
+    {difficulty:"advanced", skill:"Diagnostic reasoning", type:"Scenario analysis", question:"A hospital's diagnostic model performs at 98% in validation but 74% at a different hospital using the same equipment type. List two hypotheses beyond 'the model is bad,' and how you'd test each.", answer:"(1) Sampling bias — training data wasn't representative of the new hospital's patient population; test by comparing feature distributions across both hospitals. (2) Data drift/format mismatch — subtle differences in how equipment at the new site records data; test by auditing raw data pipelines for the new hospital for formatting or unit differences.", explanation:"Cross-site performance drops are rarely purely about model quality — they're usually about population or pipeline mismatches.", reasoning:"Diagnosing correctly avoids wasted effort re-engineering a model that was never the actual problem.", commonWrong:"'Retrain with a more powerful model architecture.'", whyTempting:"A performance drop instinctively feels like a model-capability problem, even when it's a data problem."},
+    {difficulty:"advanced", skill:"Choose the correct approach", type:"Choose the correct ML approach", question:"You need real-time fraud detection where transaction patterns can shift within hours (e.g., during a coordinated attack), and false negatives are costly. Argue for a training paradigm and evaluation strategy.", answer:"Online learning (or frequent retraining) paired with continuous, automated monitoring against a rolling baseline, plus conservative bounds on how far a single batch of new data can move the model, given the cost asymmetry of false negatives.", explanation:"The combination of speed-of-change and cost asymmetry points strongly away from slow batch retraining alone.", reasoning:"This tests whether you connect business constraints (cost of errors, speed of change) to a specific technical design choice, not just recite definitions.", commonWrong:"'Just use the most accurate model architecture available.'", whyTempting:"Model architecture feels like the highest-leverage lever, but here the training schedule and monitoring strategy matter more."},
+    {difficulty:"advanced", skill:"Trade-off reasoning", type:"Concept comparison", question:"Under what specific circumstances could instance-based learning actually be the better engineering choice over model-based learning, despite its scaling downsides?", answer:"When the dataset is small-to-moderate, the true pattern is highly irregular (doesn't fit any simple function well), interpretability of 'why' a prediction was made (via similar past cases) matters, and prediction-time latency isn't critical.", explanation:"This tests whether the learner can reason past 'model-based is generally better' to specific conditions where the trade-off flips.", reasoning:"Real engineering decisions depend on constraints, not universal rankings between techniques.", commonWrong:"'Model-based learning is always superior at scale, so it's always the right default.'", whyTempting:"It's true at scale, which makes it feel universally true, ignoring smaller or irregular-pattern cases."},
+    {difficulty:"beginner", skill:"Explain-to-a-child", type:"Short answer", question:"In one sentence, explain overfitting using a school analogy.", answer:"It's like memorizing the exact answers to a practice test instead of understanding the subject, so a new, different test catches you off guard.", explanation:"This checks whether the analogy correctly captures 'memorized specifics, not general understanding.'", reasoning:"A correct analogy should transfer to why performance drops on new material.", commonWrong:"'It's when the model studies too much.'", whyTempting:"It sounds plausible but misses the key idea — it's not about effort, it's about memorizing noise vs. learning signal."}
+  ];
+
+  function renderExercises(filter){
+    var list = document.getElementById('exerciseList');
+    if(!list) return;
+    list.innerHTML = '';
+    exercises.filter(function(e){ return filter==='all' || e.difficulty===filter; }).forEach(function(e, idx){
+      var box = document.createElement('div');
+      box.className = 'exercise';
+      var id = 'ex-ans-'+filter+'-'+idx+'-'+Math.random().toString(36).slice(2,7);
+      box.innerHTML =
+        '<div class="exercise-meta">'+
+          '<span class="badge '+e.difficulty+'">'+e.difficulty+'</span>'+
+          '<span class="badge skill">'+e.skill+'</span>'+
+          '<span class="badge skill">'+e.type+'</span>'+
+        '</div>'+
+        '<p style="font-weight:600;">'+e.question+'</p>'+
+        '<button class="showbtn" data-target="'+id+'">Show answer</button>'+
+        '<div class="exercise-answer" id="'+id+'">'+
+          '<p><strong>Answer:</strong> '+e.answer+'</p>'+
+          '<p><strong>Explanation:</strong> '+e.explanation+'</p>'+
+          '<p><strong>Reasoning:</strong> '+e.reasoning+'</p>'+
+          '<p><strong>Common wrong answer:</strong> '+e.commonWrong+'</p>'+
+          '<p style="margin-bottom:0;"><strong>Why it\'s tempting:</strong> '+e.whyTempting+'</p>'+
+        '</div>';
+      list.appendChild(box);
+    });
+    list.querySelectorAll('.showbtn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var t = document.getElementById(btn.getAttribute('data-target'));
+        var show = t.classList.toggle('show');
+        btn.textContent = show ? 'Hide answer' : 'Show answer';
+      });
+    });
+  }
+  renderExercises('all');
+  document.querySelectorAll('#exerciseFilters .filter-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#exerciseFilters .filter-btn').forEach(function(b){b.classList.toggle('active', b===btn);});
+      renderExercises(btn.getAttribute('data-filter'));
+    });
+  });
+
+  /* ============ DATA: INTERVIEW QUESTIONS ============ */
+  var interviewQs = [
+    {level:"Beginner", q:"What is machine learning, in your own words?", expected:"A system that learns patterns from data instead of following explicit hand-written rules.", strong:"ML is a way of building software where you give the system examples with known outcomes and let it find the pattern connecting them, rather than writing that logic yourself.", deep:"Formally: a system improves at task T, per performance measure P, through experience E, without being explicitly reprogrammed for each new case.", concepts:"Definition of ML, task/experience/performance framing", weak:"'It's when computers think like humans.'", tip:"Avoid anthropomorphizing — grounding your answer in data and rules signals real understanding.", thirty:"ML systems learn rules from labeled data rather than having those rules hand-coded by a programmer.", followup:"Can you give an example where ML would be overkill?"},
+    {level:"Beginner", q:"What's the difference between a feature and a label?", expected:"Feature = input; label = the correct output the model is trained to predict.", strong:"Features describe an example (inputs); the label is the target answer we want the model to learn to produce for that example.", deep:"In tabular data, features are typically the independent variables/columns, and the label is the dependent variable the supervised algorithm optimizes against.", concepts:"Feature, label, supervised learning structure", weak:"'They're both just data.'", tip:"Use a concrete example (like spam email) rather than a pure definition — it demonstrates applied understanding.", thirty:"Features are what goes in; the label is the correct answer the model tries to predict.", followup:"What happens if a feature accidentally contains label information?"},
+    {level:"Beginner", q:"When would you NOT use machine learning for a problem?", expected:"When a simple, stable, fully-known rule already solves the problem.", strong:"If the task has a small number of clear, stable rules — like calculating tax or validating a ZIP code format — a deterministic function is simpler, cheaper, and more predictable than training and maintaining a model.", deep:"The cost-benefit only favors ML once rule complexity, volume of edge cases, or instability over time exceeds what a human can maintain by hand — otherwise ML adds unnecessary operational overhead (data pipelines, retraining, monitoring).", concepts:"Traditional programming vs. ML trade-offs", weak:"'ML is always better, so always use it.'", tip:"Interviewers specifically probe for this because over-applying ML is a common junior-engineer mistake.", thirty:"When the task has simple, stable rules a person can just write directly.", followup:"How would you convince a stakeholder who insists on using ML anyway?"},
+    {level:"Beginner", q:"What does 'training' a model actually mean?", expected:"Searching for model parameters that make predictions match the training labels as closely as possible.", strong:"Training is the process of adjusting a model's internal parameters, using the training data, until its predictions align as closely as possible with the known correct answers.", deep:"Concretely, this usually means minimizing a loss function via an optimization procedure (e.g., gradient-based methods) over the parameter space.", concepts:"Training, parameters, optimization", weak:"'Training is when the computer studies the data.'", tip:"Mention the concrete mechanism (adjusting parameters to reduce error) rather than a vague metaphor.", thirty:"Training adjusts a model's parameters so its predictions match the training labels as closely as possible.", followup:"What's the difference between training and inference?"},
+    {level:"Intermediate", q:"Explain overfitting and how you'd detect it.", expected:"Overfitting is when a model fits training-set noise instead of the true pattern; detect via a large train/test performance gap.", strong:"Overfitting happens when a model has enough flexibility to fit not just the real underlying pattern but also random noise specific to the training set. You detect it by comparing training performance to performance on a held-out test set — a large gap is the signature.", deep:"More rigorously, cross-validation across multiple folds gives a more stable generalization estimate than a single train/test split, especially with smaller datasets.", concepts:"Overfitting, generalization, cross-validation", weak:"'Overfitting is when the model is too accurate.'", tip:"Be precise: it's not accuracy itself that's the problem, it's the gap between training and test performance.", thirty:"Overfitting is fitting training noise instead of signal; you detect it via a train/test accuracy gap.", followup:"What are two concrete techniques to reduce overfitting?"},
+    {level:"Intermediate", q:"What's the difference between a parameter and a hyperparameter?", expected:"Parameters are learned from data during training; hyperparameters are set before training and control the learning process.", strong:"Parameters are the numbers the model itself adjusts during training to fit the data — like weights in a linear model. Hyperparameters are settings a human (or a search process) chooses beforehand that shape how training happens, like model complexity limits.", deep:"Hyperparameters are typically tuned via a separate validation set or cross-validation, never the final test set, to avoid contaminating the generalization estimate.", concepts:"Parameters, hyperparameters, validation", weak:"'They're basically synonyms.'", tip:"Give one concrete example of each to prove you know the distinction operationally, not just by definition.", thirty:"Parameters are learned during training; hyperparameters are chosen before training.", followup:"How would you tune a hyperparameter without leaking test data?"},
+    {level:"Intermediate", q:"How does online learning differ from batch learning operationally?", expected:"Batch = periodic full retraining; online = continuous incremental updates.", strong:"Batch learning retrains from scratch on the full dataset on a schedule, then stays frozen until the next cycle. Online learning updates the existing model incrementally as new data streams in, adapting faster but requiring careful monitoring since bad data can degrade it gradually and silently.", deep:"Online learning also typically requires bounding the learning rate or update magnitude per example to avoid over-reacting to any single data point or outlier.", concepts:"Batch learning, online learning, monitoring, learning rate", weak:"'Online learning is when the model runs on a website.'", tip:"Clarify explicitly that 'online' refers to the training schedule, not deployment location — this is one of the most common beginner mix-ups.", thirty:"Batch retrains periodically on all data; online updates continuously as new data arrives.", followup:"What monitoring would you add for an online-learning system in production?"},
+    {level:"Intermediate", q:"Why might a model with 100% training accuracy be a red flag rather than a success?", expected:"It often signals overfitting — the model may have memorized the training set rather than learned a generalizable pattern.", strong:"Perfect training accuracy, especially on real-world noisy data, usually means the model has enough flexibility to fit every quirk in the training set, including mislabeled or noisy examples — which typically hurts, rather than helps, performance on new data.", deep:"This is especially suspicious for high-capacity models (like deep decision trees) on modest-sized datasets, and warrants immediate held-out evaluation before trusting the result.", concepts:"Overfitting, model capacity, evaluation discipline", weak:"'100% is the best possible score, so it's great.'", tip:"Show skepticism toward suspiciously perfect metrics — that instinct is exactly what interviewers are probing for.", thirty:"Perfect training accuracy is often a sign of memorization (overfitting), not true skill.", followup:"How would you confirm whether it's actually overfitting versus a genuinely easy problem?"},
+    {level:"Advanced", q:"Walk through how you'd diagnose whether a production accuracy drop is due to overfitting, data drift, or a pipeline bug.", expected:"Check training-vs-test gap history (overfitting), compare recent input distributions to training-time distributions (drift), and audit the data pipeline for schema/format changes (bug).", strong:"First, I'd check whether the train/test gap was already present at launch — if so, it points to overfitting from day one, not a new issue. If the gap has grown since launch specifically, I'd compare the statistical distribution of recent production inputs against training-time data to check for drift. In parallel, I'd audit the data pipeline for any recent schema, unit, or encoding changes that could look like a model problem but are really a plumbing problem.", deep:"A rigorous version adds automated distribution-shift alerts (e.g., population stability index or similar) and shadow-deployment comparisons before rolling out any 'fix' to confirm the diagnosis is correct before spending engineering effort.", concepts:"Overfitting, data drift, pipeline debugging, monitoring design", weak:"'I'd just retrain the model with more data.'", tip:"Interviewers want to see a structured diagnostic process, not a jump straight to a fix.", thirty:"I'd separate the three causes by checking the train/test gap history, comparing input distributions over time, and auditing the pipeline for changes.", followup:"What metrics would you put on a dashboard to catch this earlier next time?"},
+    {level:"Advanced", q:"Argue for when instance-based learning could outperform model-based learning as an engineering choice.", expected:"Small/irregular datasets, need for interpretability via similar cases, low sensitivity to prediction latency.", strong:"When the true pattern is highly irregular and doesn't fit any simple function well, when the dataset is small-to-moderate so scaling costs aren't prohibitive, and when explaining a prediction via 'here are similar past cases' has real business value (e.g., supporting a human decision-maker), instance-based approaches can be the more appropriate engineering choice despite their scaling downsides.", deep:"This connects to the bias-variance framing: instance-based methods make fewer structural assumptions about the data's shape, which is valuable exactly when you're not confident any simple function family fits the true relationship.", concepts:"Instance-based vs model-based trade-offs, bias-variance intuition", weak:"'Model-based is always better because it scales.'", tip:"Show you can reason about trade-offs conditionally rather than reciting a fixed ranking.", thirty:"Instance-based learning wins when the pattern is irregular, the dataset is modest, and case-based interpretability matters more than latency.", followup:"How would you hybridize the two approaches?"},
+    {level:"Scenario", q:"Your company wants to add ML to a feature that currently uses a simple, working rule-based system, purely because 'ML is more modern.' How do you respond?", expected:"Push back with the traditional-vs-ML framework: ask whether the current rules are actually failing, and whether the added complexity is justified.", strong:"I'd ask what specific problem the current rule-based system is failing to solve — if it's working well and the rules are stable, replacing it with ML adds data dependency, training/monitoring overhead, and less predictability without a clear benefit. I'd only recommend ML if there's evidence of a real gap (missed edge cases, maintenance burden) that ML would concretely address.", deep:"I'd frame this as a cost-benefit case: quantify the maintenance cost of the current rules versus the ongoing cost of an ML pipeline (data collection, labeling, monitoring, retraining) before recommending a switch.", concepts:"Engineering judgment, when NOT to use ML, stakeholder communication", weak:"'Sure, ML is always an upgrade.'", tip:"This question tests judgment and the willingness to say no to unnecessary complexity — a highly valued signal.", thirty:"I'd ask what's actually broken first — if nothing is, ML adds overhead without a clear benefit.", followup:"How would you quantify that cost-benefit for a skeptical stakeholder?"},
+    {level:"Scenario", q:"A hiring model appears to systematically favor candidates similar to those historically hired. How do you investigate and respond?", expected:"Investigate training data for historical bias, audit features for proxies of protected characteristics, and involve human review before deployment decisions.", strong:"I'd start by auditing the training data itself — if the historical hiring decisions embedded bias, the model will have learned to reproduce it, since it can only learn from the labels it's given. I'd check whether any features act as proxies for protected characteristics (like zip code correlating with race), and I would not treat model 'accuracy' against historical hiring decisions as the right success metric here at all.", deep:"This also requires organizational, not just technical, judgment: deciding what fairness criterion is appropriate for this context, and likely involving legal/ethics stakeholders, not just engineers, before deployment.", concepts:"Data quality, bias, sampling bias, human judgment vs. AI acceleration", weak:"'The model must be broken, retrain it.'", tip:"This question probes whether you understand that ML bias problems are usually data/label problems, not purely algorithmic bugs.", thirty:"I'd audit the training data and features for embedded historical bias before assuming it's a model bug, and involve human review before any deployment decision.", followup:"What would you check to determine if a feature is acting as a proxy for a protected characteristic?"}
+  ];
+
+  function renderIQ(filter){
+    var list = document.getElementById('iqList');
+    if(!list) return;
+    list.innerHTML = '';
+    interviewQs.filter(function(q){ return filter==='all' || q.level===filter; }).forEach(function(q, idx){
+      var card = document.createElement('div');
+      card.className = 'iq-card';
+      var bodyId = 'iqbody-'+filter+'-'+idx+'-'+Math.random().toString(36).slice(2,7);
+      card.innerHTML =
+        '<div class="exercise-meta"><span class="badge '+(q.level==='Beginner'?'beginner':q.level==='Intermediate'?'intermediate':q.level==='Advanced'?'advanced':'skill')+'">'+q.level+'</span></div>'+
+        '<div class="iq-q">'+q.q+'</div>'+
+        '<button class="iq-toggle" data-target="'+bodyId+'">Show full answer</button>'+
+        '<div class="iq-body" id="'+bodyId+'">'+
+          '<div class="iq-row"><strong>Expected answer</strong>'+q.expected+'</div>'+
+          '<div class="iq-row"><strong>Strong interview answer</strong>'+q.strong+'</div>'+
+          '<div class="iq-row"><strong>Deep-dive answer</strong>'+q.deep+'</div>'+
+          '<div class="iq-row"><strong>Key concepts tested</strong>'+q.concepts+'</div>'+
+          '<div class="iq-row"><strong>Common weak answer</strong>'+q.weak+'</div>'+
+          '<div class="iq-row"><strong>Interview tip</strong>'+q.tip+'</div>'+
+          '<div class="iq-row"><strong>30-second answer</strong>'+q.thirty+'</div>'+
+          '<div class="iq-row"><strong>Likely follow-up</strong>'+q.followup+'</div>'+
+        '</div>';
+      list.appendChild(card);
+    });
+    list.querySelectorAll('.iq-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var t = document.getElementById(btn.getAttribute('data-target'));
+        var show = t.classList.toggle('show');
+        btn.textContent = show ? 'Hide full answer' : 'Show full answer';
+      });
+    });
+  }
+  renderIQ('all');
+  document.querySelectorAll('#iqFilters .filter-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#iqFilters .filter-btn').forEach(function(b){b.classList.toggle('active', b===btn);});
+      renderIQ(btn.getAttribute('data-filter'));
+    });
+  });
+
+  /* ============ FLASHCARDS ============ */
+  var flashcards = interviewQs.map(function(q){ return {front:q.q, back:q.thirty}; }).concat([
+    {front:"What's the difference between a model and an algorithm?", back:"The algorithm is the training procedure; the model is the trained result the algorithm produces."},
+    {front:"What is a hyperparameter?", back:"A setting chosen before training that controls the learning process — not learned from data."},
+    {front:"What's data drift?", back:"A shift in the real-world data distribution after training, degrading performance without any code change."},
+    {front:"Why use a held-out test set?", back:"Because training accuracy overstates real-world performance — the test set estimates generalization honestly."},
+    {front:"Instance-based vs. model-based learning — the one-line difference?", back:"Instance-based compares new cases to stored examples; model-based fits a reusable formula and can discard the raw examples."}
+  ]);
+  var flashOrder = flashcards.map(function(_,i){return i;});
+  var flashIdx = 0;
+  var flashcardEl = document.getElementById('flashcard');
+  var flashFront = document.getElementById('flashFront');
+  var flashBack = document.getElementById('flashBack');
+  var flashCount = document.getElementById('flashCount');
+
+  function renderFlash(){
+    var card = flashcards[flashOrder[flashIdx]];
+    flashFront.textContent = card.front;
+    flashBack.textContent = card.back;
+    flashCount.textContent = (flashIdx+1)+' / '+flashcards.length;
+    flashcardEl.classList.remove('flipped');
+  }
+  if(flashcardEl){
+    renderFlash();
+    flashcardEl.addEventListener('click', function(){ flashcardEl.classList.toggle('flipped'); });
+    flashcardEl.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flashcardEl.classList.toggle('flipped'); } });
+    document.getElementById('flashNext').addEventListener('click', function(){ flashIdx=(flashIdx+1)%flashcards.length; renderFlash(); });
+    document.getElementById('flashPrev').addEventListener('click', function(){ flashIdx=(flashIdx-1+flashcards.length)%flashcards.length; renderFlash(); });
+    document.getElementById('flashShuffle').addEventListener('click', function(){
+      for(var i=flashOrder.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=flashOrder[i]; flashOrder[i]=flashOrder[j]; flashOrder[j]=t; }
+      flashIdx=0; renderFlash();
+    });
+  }
+
+  /* ============ INTERVIEW TRAPS ============ */
+  var traps = [
+    {title:"\"ML is basically AI that thinks like a human.\"",
+      weak:"ML is AI that thinks like a human brain.",
+      why:"This anthropomorphizes the system and reveals no understanding of the actual mechanism — data, parameters, optimization.",
+      better:"ML systems learn statistical patterns from labeled data; they don't reason or understand meaning the way humans do.",
+      expert:"ML is a family of optimization techniques that fit parameterized functions to data in order to minimize a defined error/loss measure — 'thinking' is not a meaningful part of the mechanism."},
+    {title:"\"Higher training accuracy always means a better model.\"",
+      weak:"I'd pick the model with the highest training accuracy.",
+      why:"This ignores generalization entirely and is a classic overfitting trap.",
+      better:"I'd compare models using held-out test/validation performance, not training accuracy alone.",
+      expert:"I'd use cross-validated test performance, and specifically inspect the train/test gap — a small gap with solid test accuracy beats a huge gap with perfect training accuracy every time."},
+    {title:"\"Online learning just means the model is deployed on a website.\"",
+      weak:"Online learning is when the model works online, like on the internet.",
+      why:"This conflates the training schedule with deployment location — a common and easily caught misconception.",
+      better:"Online learning means the model updates incrementally as new data arrives, regardless of where it's deployed.",
+      expert:"Online learning is a training paradigm defined by incremental parameter updates on streaming data, independent of deployment environment — a batch-trained model can still be served 'online' over the internet."},
+    {title:"\"More features are always better.\"",
+      weak:"I'd add every available feature to maximize information.",
+      why:"Irrelevant or leaky features add noise, increase overfitting risk, and can even leak the label accidentally.",
+      better:"I'd select features based on relevance and check for potential label leakage before including them.",
+      expert:"I'd evaluate feature importance and correlation with the target during exploratory analysis, explicitly test for leakage, and prefer a smaller, well-justified feature set unless added features demonstrably improve held-out performance."}
+  ];
+
+  function renderTraps(){
+    var wrap = document.getElementById('trapList');
+    if(!wrap) return;
+    traps.forEach(function(t){
+      var el = document.createElement('div');
+      el.className = 'trap';
+      el.innerHTML = '<div class="iq-q">'+t.title+'</div>'+
+        '<div class="trap-chain">'+
+          '<div class="trap-step weak"><strong>Weak answer:</strong> '+t.weak+'</div>'+
+          '<div class="trap-step why"><strong>Why it is weak:</strong> '+t.why+'</div>'+
+          '<div class="trap-step better"><strong>Better answer:</strong> '+t.better+'</div>'+
+          '<div class="trap-step expert"><strong>Expert answer:</strong> '+t.expert+'</div>'+
+        '</div>';
+      wrap.appendChild(el);
+    });
+  }
+  renderTraps();
+
+})();
+</script>
+</body>
+</html>
